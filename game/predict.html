@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <title>FanZone — Predict</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="app.css"/>
+  <style>
+    .match-banner { margin:16px;border-radius:var(--radius);background:linear-gradient(135deg,#0d1a0d,#111);border:1px solid var(--border-green);padding:16px; }
+    .match-banner__label { font-size:.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px; }
+    .match-banner__teams { display:flex;align-items:center;justify-content:space-around; }
+    .mb-team { display:flex;flex-direction:column;align-items:center;gap:6px; }
+    .mb-team__flag { font-size:2.4rem;line-height:1; }
+    .mb-team__name { font-family:var(--font-display);font-size:.9rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em; }
+    .mb-vs { font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--text-3); }
+    .mb-kickoff { text-align:center;margin-top:10px;font-size:.75rem;color:var(--green);font-weight:700; }
+
+    .predict-section { margin:0 16px 20px; }
+    .predict-label { font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:10px; }
+
+    /* Win picker */
+    .win-picker { display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px; }
+    .win-btn { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .18s; }
+    .win-btn.selected { border-color:var(--border-green);background:var(--green-dim); }
+    .win-btn__flag { font-size:1.5rem;line-height:1; }
+    .win-btn__label { font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2); }
+    .win-btn__odds { font-size:.68rem;color:var(--green);font-weight:700; }
+
+    /* Score stepper */
+    .score-stepper { display:flex;align-items:center;justify-content:center;gap:20px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px; }
+    .stepper-team { display:flex;flex-direction:column;align-items:center;gap:10px;flex:1; }
+    .stepper-team__name { font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);font-weight:700; }
+    .stepper-controls { display:flex;align-items:center;gap:14px; }
+    .stepper-btn { width:34px;height:34px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);color:var(--text-1);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s; }
+    .stepper-btn:hover { border-color:var(--border-green);color:var(--green); }
+    .stepper-val { font-family:var(--font-display);font-size:2.6rem;font-weight:900;color:var(--text-1);min-width:40px;text-align:center;line-height:1; }
+    .stepper-dash { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--text-3); }
+
+    /* Scorer dropdown */
+    .scorer-select { width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;font-size:.88rem;color:var(--text-1);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer; }
+    .scorer-select:focus { border-color:var(--border-green); }
+    .scorer-select option { background:var(--bg-2); }
+
+    /* Confidence slider */
+    .confidence-wrap { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px; }
+    .confidence-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
+    .confidence-val { font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--green); }
+    input[type=range] { -webkit-appearance:none;width:100%;height:6px;background:var(--bg-3);border-radius:4px;outline:none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 0 8px var(--green-glow); }
+    input[type=range]::-moz-range-thumb { width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;border:none; }
+    .confidence-labels { display:flex;justify-content:space-between;margin-top:6px; }
+    .confidence-labels span { font-size:.65rem;color:var(--text-3); }
+
+    /* Submit */
+    .submit-wrap { margin:0 16px 16px; }
+    .xp-preview { display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;font-size:.82rem;color:var(--text-3); }
+    .xp-preview__val { color:var(--green);font-weight:700; }
+
+    /* Leaderboard */
+    .lb-row { display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border); }
+    .lb-row:last-child { border:none; }
+    .lb-rank { font-family:var(--font-display);font-size:1.1rem;font-weight:900;color:var(--text-3);min-width:28px;text-align:center; }
+    .lb-rank.gold { color:var(--gold); }
+    .lb-rank.silver { color:#C0C0C0; }
+    .lb-rank.bronze { color:#CD7F32; }
+    .lb-info { flex:1; }
+    .lb-name { font-weight:700;font-size:.85rem; }
+    .lb-sub { font-size:.7rem;color:var(--text-3); }
+    .lb-xp { font-family:var(--font-display);font-size:1rem;font-weight:900;color:var(--green); }
+
+    /* My predictions */
+    .pred-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px; }
+    .pred-card__top { display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; }
+    .pred-card__match { font-weight:700;font-size:.85rem; }
+    .pred-card__status { font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px; }
+    .pred-card__status.correct { background:rgba(204,255,0,.12);color:var(--green);border:1px solid var(--border-green); }
+    .pred-card__status.pending { background:rgba(255,255,255,.06);color:var(--text-3);border:1px solid var(--border); }
+    .pred-card__status.wrong { background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,68,.3); }
+    .pred-card__detail { font-size:.78rem;color:var(--text-2); }
+    .pred-card__xp { font-size:.72rem;color:var(--green);font-weight:700;margin-top:4px; }
+  </style>
+</head>
+<body>
+
+<div class="page-top">
+  <div class="page-top__title">🎯 Predict</div>
+  <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
+</div>
+
+<!-- TABS -->
+<div style="padding:12px 16px 0">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('predict',this)">Predict</button>
+    <button class="tab" onclick="switchTab('mypredicts',this)">My Picks</button>
+    <button class="tab" onclick="switchTab('leaderboard',this)">Top 100</button>
+  </div>
+</div>
+
+<!-- PREDICT TAB -->
+<div id="tab-predict">
+  <!-- Match banner -->
+  <div class="match-banner">
+    <div class="match-banner__label">🔥 Upcoming · FIFA World Cup Final</div>
+    <div class="match-banner__teams">
+      <div class="mb-team"><div class="mb-team__flag">🇧🇷</div><div class="mb-team__name">Brazil</div></div>
+      <div class="mb-vs">VS</div>
+      <div class="mb-team"><div class="mb-team__flag">🇩🇪</div><div class="mb-team__name">Germany</div></div>
+    </div>
+    <div class="mb-kickoff">⏱ Kickoff in 2h 45m · Lusail Stadium</div>
+  </div>
+
+  <!-- Who wins -->
+  <div class="predict-section">
+    <div class="predict-label">Who wins?</div>
+    <div class="win-picker">
+      <button class="win-btn" onclick="selectWinner('brazil',this)">
+        <div class="win-btn__flag">🇧🇷</div>
+        <div class="win-btn__label">Brazil</div>
+        <div class="win-btn__odds">+150 XP</div>
+      </button>
+      <button class="win-btn" onclick="selectWinner('draw',this)">
+        <div class="win-btn__flag">🤝</div>
+        <div class="win-btn__label">Draw</div>
+        <div class="win-btn__odds">+200 XP</div>
+      </button>
+      <button class="win-btn" onclick="selectWinner('germany',this)">
+        <div class="win-btn__flag">🇩🇪</div>
+        <div class="win-btn__label">Germany</div>
+        <div class="win-btn__odds">+175 XP</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Score prediction -->
+  <div class="predict-section">
+    <div class="predict-label">Exact Score (+300 XP bonus)</div>
+    <div class="score-stepper">
+      <div class="stepper-team">
+        <div class="stepper-team__name">🇧🇷 Brazil</div>
+        <div class="stepper-controls">
+          <button class="stepper-btn" onclick="changeScore('h',-1)">−</button>
+          <div class="stepper-val" id="homeScore">2</div>
+          <button class="stepper-btn" onclick="changeScore('h',1)">+</button>
+        </div>
+      </div>
+      <div class="stepper-dash">—</div>
+      <div class="stepper-team">
+        <div class="stepper-team__name">🇩🇪 Germany</div>
+        <div class="stepper-controls">
+          <button class="stepper-btn" onclick="changeScore('a',-1)">−</button>
+          <div class="stepper-val" id="awayScore">1</div>
+          <button class="stepper-btn" onclick="changeScore('a',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- First scorer -->
+  <div class="predict-section">
+    <div class="predict-label">First Goalscorer (+250 XP)</div>
+    <select class="scorer-select" id="scorerSelect">
+      <option value="">— Pick a player —</option>
+      <optgroup label="🇧🇷 Brazil">
+        <option>Vinicius Jr.</option>
+        <option>Neymar Jr.</option>
+        <option>Rodrygo</option>
+        <option>Richarlison</option>
+        <option>Gabriel Jesus</option>
+      </optgroup>
+      <optgroup label="🇩🇪 Germany">
+        <option>Kai Havertz</option>
+        <option>Leroy Sané</option>
+        <option>Jamal Musiala</option>
+        <option>Thomas Müller</option>
+        <option>Serge Gnabry</option>
+      </optgroup>
+      <option value="og">Own Goal</option>
+      <option value="no">No Goalscorer</option>
+    </select>
+  </div>
+
+  <!-- Confidence -->
+  <div class="predict-section">
+    <div class="confidence-wrap">
+      <div class="confidence-header">
+        <div class="predict-label" style="margin:0">Confidence Level</div>
+        <div class="confidence-val" id="confVal">70%</div>
+      </div>
+      <input type="range" min="10" max="100" step="5" value="70" id="confSlider" oninput="updateConf(this.value)"/>
+      <div class="confidence-labels"><span>10% Unsure</span><span>50% Likely</span><span>100% Certain</span></div>
+    </div>
+  </div>
+
+  <!-- XP preview + submit -->
+  <div class="submit-wrap">
+    <div class="xp-preview">Potential reward: <span class="xp-preview__val" id="xpReward">⚡ 150 XP</span></div>
+    <button class="btn btn--primary btn--full" style="font-size:1rem;padding:15px" onclick="submitPrediction()">🎯 Lock In Prediction</button>
+    <div style="text-align:center;font-size:.7rem;color:var(--text-3);margin-top:10px">XP has zero monetary value · Entertainment only</div>
+  </div>
+</div>
+
+<!-- MY PICKS TAB -->
+<div id="tab-mypredicts" style="display:none;padding:16px">
+  <div id="myPicksEl"></div>
+</div>
+
+<!-- LEADERBOARD TAB -->
+<div id="tab-leaderboard" style="display:none;padding:0 16px 16px">
+  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;margin-top:16px" id="lbEl"></div>
+</div>
+
+<div style="height:16px"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
+  <a href="clash.html" class="nav-item" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
+  <a href="predict.html" class="nav-item active" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
+  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="profile.html" class="nav-item" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
+</nav>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+const app = initializeApp(FB_CONFIG);
+const auth = getAuth(app);
+onAuthStateChanged(auth, u => {
+  FZ.user = u;
+  const stats = FZ.getStats();
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(stats.xp) + ' XP';
+});
+</script>
+<script>
+let selectedWinner = null;
+let homeG = 2, awayG = 1;
+
+const XP_MAP = { brazil:150, draw:200, germany:175 };
+const MOCK_PREDICTIONS = [
+  { match:'🇧🇷 Brazil vs 🇦🇷 Argentina', pick:'Brazil Win · 2-1', scorer:'Vinicius Jr.', status:'correct', xp:'+400 XP' },
+  { match:'🇫🇷 France vs 🇩🇪 Germany', pick:'France Win · 1-0', scorer:'Mbappé', status:'wrong', xp:'+0 XP' },
+  { match:'🇵🇹 Portugal vs 🇺🇾 Uruguay', pick:'Draw · 0-0', scorer:'No scorer', status:'pending', xp:'Pending' },
+  { match:'🇯🇵 Japan vs 🇪🇸 Spain', pick:'Japan Win · 2-1', scorer:'Kubo', status:'correct', xp:'+550 XP' },
+];
+const LEADERBOARD = [
+  { name:'PredictWizard', flag:'🇦🇷', xp:'24.8K', streak:'🔥 18' },
+  { name:'TheOracleFC', flag:'🇧🇷', xp:'22.1K', streak:'🔥 15' },
+  { name:'TacticsGod', flag:'🇩🇪', xp:'19.6K', streak:'🔥 12' },
+  { name:'FootballSeer', flag:'🇫🇷', xp:'17.3K', streak:'🔥 9' },
+  { name:'GoalProphet', flag:'🇵🇹', xp:'15.9K', streak:'🔥 11' },
+  { name:'MatchMaster', flag:'🇲🇽', xp:'14.2K', streak:'🔥 7' },
+  { name:'BallseyPredictor', flag:'🇬🇧', xp:'13.1K', streak:'🔥 6' },
+  { name:'KingOfKicks', flag:'🇯🇵', xp:'11.8K', streak:'🔥 8' },
+  { name:'SoccerSavant', flag:'🇺🇸', xp:'10.5K', streak:'🔥 5' },
+  { name:'WingsOfFootball', flag:'🇳🇱', xp:'9.2K', streak:'🔥 4' },
+];
+const RANK_LABELS = ['🥇','🥈','🥉'];
+const RANK_CLASSES = ['gold','silver','bronze'];
+
+function selectWinner(team, btn) {
+  document.querySelectorAll('.win-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedWinner = team;
+  updateXP();
+}
+
+function changeScore(side, delta) {
+  if (side==='h') { homeG = Math.max(0, Math.min(9, homeG+delta)); document.getElementById('homeScore').textContent = homeG; }
+  else { awayG = Math.max(0, Math.min(9, awayG+delta)); document.getElementById('awayScore').textContent = awayG; }
+  updateXP();
+}
+
+function updateConf(v) {
+  document.getElementById('confVal').textContent = v + '%';
+  updateXP();
+}
+
+function updateXP() {
+  let base = selectedWinner ? XP_MAP[selectedWinner] : 0;
+  const conf = parseInt(document.getElementById('confSlider').value);
+  const scorer = document.getElementById('scorerSelect')?.value;
+  if (scorer) base += 250;
+  const bonus = Math.round(base * conf / 100);
+  document.getElementById('xpReward').textContent = '⚡ ' + (base + bonus) + ' XP';
+}
+
+function submitPrediction() {
+  if (!selectedWinner) { showToast('Pick a winner first!'); return; }
+  const scorer = document.getElementById('scorerSelect').value;
+  const conf = document.getElementById('confSlider').value;
+  const xpBase = XP_MAP[selectedWinner] + (scorer?250:0);
+  const xp = Math.round(xpBase * parseInt(conf) / 100 + xpBase);
+  FZ.addXP(xp);
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+  showToast('🎯 Prediction locked! +' + xp + ' XP earned');
+  setTimeout(()=>{ selectedWinner=null; document.querySelectorAll('.win-btn').forEach(b=>b.classList.remove('selected')); }, 1500);
+}
+
+function renderMyPicks() {
+  document.getElementById('myPicksEl').innerHTML = MOCK_PREDICTIONS.map(p=>`
+    <div class="pred-card">
+      <div class="pred-card__top">
+        <div class="pred-card__match">${p.match}</div>
+        <div class="pred-card__status ${p.status}">${p.status==='correct'?'✓ Correct':p.status==='wrong'?'✗ Wrong':'⏳ Pending'}</div>
+      </div>
+      <div class="pred-card__detail">${p.pick} · ⚽ ${p.scorer}</div>
+      <div class="pred-card__xp">${p.xp}</div>
+    </div>`).join('');
+}
+
+function renderLeaderboard() {
+  document.getElementById('lbEl').innerHTML = LEADERBOARD.map((p,i)=>`
+    <div class="lb-row">
+      <div class="lb-rank ${RANK_CLASSES[i]||''}">${RANK_LABELS[i]||i+1}</div>
+      <div class="avatar avatar--sm">${p.flag}</div>
+      <div class="lb-info">
+        <div class="lb-name">${p.name}</div>
+        <div class="lb-sub">Streak ${p.streak}</div>
+      </div>
+      <div class="lb-xp">${p.xp}</div>
+    </div>`).join('');
+}
+
+function switchTab(tab, btn) {
+  ['predict','mypredicts','leaderboard'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab==='mypredicts') renderMyPicks();
+  if (tab==='leaderboard') renderLeaderboard();
+}
+
+updateXP();
+</script>
+</body>
+</html>

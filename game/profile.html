@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <title>FanZone — Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="app.css"/>
+  <style>
+    /* Hero section */
+    .profile-hero { margin:16px;background:linear-gradient(160deg,#0d1a0d,#111);border:1px solid var(--border-green);border-radius:var(--radius);padding:20px; }
+    .profile-hero__top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px; }
+    .profile-hero__info { flex:1;margin-left:14px; }
+    .profile-hero__name { font-family:var(--font-display);font-size:1.4rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;line-height:1.1;margin-bottom:4px; }
+    .profile-hero__handle { font-size:.78rem;color:var(--text-3);margin-bottom:6px; }
+    .profile-hero__badges { display:flex;gap:4px;flex-wrap:wrap; }
+    .edit-btn { width:34px;height:34px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);color:var(--text-3);font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0; }
+
+    /* Level + XP */
+    .level-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:6px; }
+    .level-label { font-size:.72rem;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.06em; }
+    .level-val { font-family:var(--font-display);font-size:1rem;font-weight:900;color:var(--green); }
+    .xp-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:.72rem;color:var(--text-3); }
+
+    /* Stats grid */
+    .stats-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 16px 16px; }
+    .stat-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px;text-align:center; }
+    .stat-card__val { font-family:var(--font-display);font-size:1.4rem;font-weight:900;line-height:1;margin-bottom:3px; }
+    .stat-card__label { font-size:.62rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;line-height:1.3; }
+
+    /* Badges section */
+    .badges-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-bottom:20px; }
+    .badge-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;cursor:default;transition:border-color .15s; }
+    .badge-card.earned { border-color:var(--border-green); }
+    .badge-card.locked { opacity:.45;filter:grayscale(.5); }
+    .badge-card__icon { font-size:1.6rem;line-height:1;margin-bottom:4px; }
+    .badge-card__name { font-size:.6rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;line-height:1.3; }
+
+    /* Activity feed */
+    .activity-item { display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border); }
+    .activity-item:last-child { border:none; }
+    .activity-icon { width:32px;height:32px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0; }
+    .activity-text { flex:1; }
+    .activity-title { font-size:.83rem;font-weight:600;margin-bottom:2px; }
+    .activity-sub { font-size:.7rem;color:var(--text-3); }
+    .activity-xp { font-family:var(--font-display);font-size:.9rem;font-weight:900;color:var(--green);flex-shrink:0; }
+
+    /* Sign-out */
+    .signout-area { margin:0 16px 16px; }
+  </style>
+</head>
+<body>
+
+<div class="page-top">
+  <div class="page-top__title">👤 Profile</div>
+  <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
+</div>
+
+<!-- PROFILE HERO -->
+<div class="profile-hero">
+  <div class="profile-hero__top">
+    <div class="avatar avatar--lg avatar--ring" id="avatarEl">😎</div>
+    <div class="profile-hero__info">
+      <div class="profile-hero__name" id="profileName">FanZone Fan</div>
+      <div class="profile-hero__handle" id="profileHandle">@fan · 🏳️</div>
+      <div class="profile-hero__badges">
+        <span class="badge badge--green">Elite Predictor</span>
+        <span class="badge badge--gold">🔥 18 Streak</span>
+      </div>
+    </div>
+    <div class="edit-btn" onclick="showToast('✏️ Edit profile coming soon!')">✏️</div>
+  </div>
+  <div class="level-row">
+    <div class="level-label">Level <span id="levelNum">7</span> — <span id="levelTitle">Pro Fan</span></div>
+    <div class="level-val" id="xpTotal">0 XP</div>
+  </div>
+  <div class="xp-row">
+    <span id="xpNext">Next level: 1,200 XP</span>
+    <span id="xpPct">0%</span>
+  </div>
+  <div class="progress"><div class="progress__fill" id="xpBar" style="width:0%"></div></div>
+</div>
+
+<!-- STATS GRID -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-card__val" style="color:var(--green)" id="statPredictions">0</div>
+    <div class="stat-card__label">Predictions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__val" style="color:var(--blue)" id="statAccuracy">68%</div>
+    <div class="stat-card__label">Accuracy</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__val" style="color:var(--red)" id="statStreak">0</div>
+    <div class="stat-card__label">Streak</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__val" style="color:var(--gold)" id="statRank">#42</div>
+    <div class="stat-card__label">Global Rank</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div style="padding:0 16px 16px">
+  <div class="tabs">
+    <button class="tab active" onclick="switchProfileTab('badges',this)">Badges</button>
+    <button class="tab" onclick="switchProfileTab('activity',this)">Activity</button>
+    <button class="tab" onclick="switchProfileTab('stats',this)">Stats</button>
+  </div>
+</div>
+
+<!-- BADGES TAB -->
+<div id="ptab-badges">
+  <div class="badges-grid" id="badgesGrid"></div>
+</div>
+
+<!-- ACTIVITY TAB -->
+<div id="ptab-activity" style="display:none;padding:0 16px">
+  <div id="activityEl"></div>
+</div>
+
+<!-- STATS TAB -->
+<div id="ptab-stats" style="display:none;padding:0 16px">
+  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px">
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Performance This Month</div>
+    <div style="display:flex;flex-direction:column;gap:12px" id="perfStats"></div>
+  </div>
+  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Prediction Breakdown</div>
+    <div id="predBreakdown" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+
+<div style="height:12px"></div>
+
+<!-- SIGN OUT -->
+<div class="signout-area">
+  <button class="btn btn--danger btn--full" onclick="signOut()">Sign Out</button>
+</div>
+
+<div style="height:16px"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
+  <a href="clash.html" class="nav-item" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
+  <a href="predict.html" class="nav-item" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
+  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="profile.html" class="nav-item active" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
+</nav>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut as fbSignOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+const app = initializeApp(FB_CONFIG);
+const auth = getAuth(app);
+window._auth = auth;
+window._signOut = () => fbSignOut(auth);
+onAuthStateChanged(auth, u => {
+  FZ.user = u;
+  const stats = FZ.getStats();
+  const profile = FZ.getProfile();
+  const xp = stats.xp || 0;
+
+  // Header XP pill
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(xp) + ' XP';
+
+  // Profile card
+  if (u) {
+    document.getElementById('profileName').textContent = profile?.username || u.displayName || 'FanZone Fan';
+    document.getElementById('profileHandle').textContent = '@' + (profile?.username || 'fan').toLowerCase() + ' · ' + (profile?.country || '🏳️');
+    if (u.photoURL) {
+      document.getElementById('avatarEl').innerHTML = `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+    }
+  }
+
+  // XP / Level
+  const level = Math.floor(xp / 500) + 1;
+  const LEVEL_TITLES = ['Rookie','Fan','Enthusiast','Supporter','Fanatic','Expert','Pro Fan','Legend','Elite','GOAT'];
+  const levelTitle = LEVEL_TITLES[Math.min(level-1, LEVEL_TITLES.length-1)];
+  const xpThisLevel = xp % 500;
+  const xpPct = Math.min(100, Math.round(xpThisLevel / 500 * 100));
+  document.getElementById('levelNum').textContent = level;
+  document.getElementById('levelTitle').textContent = levelTitle;
+  document.getElementById('xpTotal').textContent = formatXP(xp) + ' XP';
+  document.getElementById('xpNext').textContent = 'Next level: ' + (500 - xpThisLevel) + ' XP';
+  document.getElementById('xpPct').textContent = xpPct + '%';
+  document.getElementById('xpBar').style.width = xpPct + '%';
+
+  // Stats
+  document.getElementById('statPredictions').textContent = stats.predictions || Math.floor(xp/80) || 0;
+  document.getElementById('statAccuracy').textContent = (stats.accuracy || 68) + '%';
+  document.getElementById('statStreak').textContent = stats.streak || 0;
+  document.getElementById('statRank').textContent = '#' + Math.max(1, 500 - Math.floor(xp/20));
+});
+</script>
+<script>
+const BADGES = [
+  { icon:'🥇', name:'First Goal', earned:true },
+  { icon:'🔥', name:'Hot Streak', earned:true },
+  { icon:'🎯', name:'Sharp Shot', earned:true },
+  { icon:'🧠', name:'Tactician', earned:true },
+  { icon:'⚡', name:'XP Rush', earned:true },
+  { icon:'👑', name:'Clash King', earned:false },
+  { icon:'🏆', name:'Champion', earned:false },
+  { icon:'🌍', name:'World Tour', earned:false },
+  { icon:'💫', name:'Legend', earned:false },
+  { icon:'🐐', name:'G.O.A.T.', earned:false },
+  { icon:'🚀', name:'Rocket Rise', earned:false },
+  { icon:'💎', name:'Diamond', earned:false },
+];
+
+const ACTIVITY = [
+  { icon:'🎯', title:'Predicted Brazil 2-1 Germany', sub:'2 hours ago', xp:'+400 XP' },
+  { icon:'⚔️', title:'Voted in "Messi vs Ronaldo" clash', sub:'3 hours ago', xp:'+25 XP' },
+  { icon:'⚽', title:'Penalty shootout — 4/5 goals', sub:'Yesterday', xp:'+400 XP' },
+  { icon:'🎯', title:'Predicted France 1-0 Portugal', sub:'Yesterday', xp:'+150 XP' },
+  { icon:'❤️', title:'Liked 3 posts on Home Feed', sub:'2 days ago', xp:'+15 XP' },
+  { icon:'💬', title:'Joined Clash chat discussion', sub:'2 days ago', xp:'+10 XP' },
+  { icon:'🔥', title:'7-day prediction streak!', sub:'3 days ago', xp:'+500 XP' },
+];
+
+const PERF_STATS = [
+  { label:'Win predictions', val:72, color:'var(--green)' },
+  { label:'Score predictions', val:28, color:'var(--blue)' },
+  { label:'First scorer', val:15, color:'var(--gold)' },
+];
+
+const PRED_BREAKDOWN = [
+  { label:'✅ Correct', count:'124', color:'var(--green)' },
+  { label:'❌ Wrong', count:'48', color:'var(--red)' },
+  { label:'⏳ Pending', count:'12', color:'var(--text-3)' },
+];
+
+function renderBadges() {
+  document.getElementById('badgesGrid').innerHTML = BADGES.map(b=>`
+    <div class="badge-card ${b.earned?'earned':'locked'}" title="${b.name}">
+      <div class="badge-card__icon">${b.icon}</div>
+      <div class="badge-card__name">${b.name}</div>
+    </div>`).join('');
+}
+
+function renderActivity() {
+  document.getElementById('activityEl').innerHTML = ACTIVITY.map(a=>`
+    <div class="activity-item">
+      <div class="activity-icon">${a.icon}</div>
+      <div class="activity-text">
+        <div class="activity-title">${a.title}</div>
+        <div class="activity-sub">${a.sub}</div>
+      </div>
+      <div class="activity-xp">${a.xp}</div>
+    </div>`).join('');
+}
+
+function renderPerfStats() {
+  document.getElementById('perfStats').innerHTML = PERF_STATS.map(s=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.8rem">
+        <span>${s.label}</span>
+        <span style="font-weight:700;color:${s.color}">${s.val}%</span>
+      </div>
+      <div class="progress"><div class="progress__fill" style="width:${s.val}%;background:${s.color}"></div></div>
+    </div>`).join('');
+  document.getElementById('predBreakdown').innerHTML = PRED_BREAKDOWN.map(p=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.85rem">${p.label}</span>
+      <span style="font-family:var(--font-display);font-size:1.1rem;font-weight:900;color:${p.color}">${p.count}</span>
+    </div>`).join('');
+}
+
+function switchProfileTab(tab, btn) {
+  ['badges','activity','stats'].forEach(t=>{
+    document.getElementById('ptab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab==='activity') renderActivity();
+  if (tab==='stats') renderPerfStats();
+}
+
+function signOut() {
+  if (window._signOut) {
+    window._signOut().then(()=>{ location.href='index.html'; }).catch(()=>{ location.href='index.html'; });
+  } else {
+    location.href = 'index.html';
+  }
+}
+
+renderBadges();
+</script>
+</body>
+</html>

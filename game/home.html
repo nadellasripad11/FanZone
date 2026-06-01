@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <title>FanZone — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="app.css"/>
+  <style>
+    .hero-match { margin:16px; border-radius:var(--radius); overflow:hidden; position:relative; background:linear-gradient(160deg,#0d1a0d,#111); border:1px solid var(--border-green); }
+    .hero-match__bg { position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&q=40') center/cover no-repeat;opacity:.08; }
+    .hero-match__inner { position:relative;padding:20px 16px; }
+    .hero-match__top { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
+    .hero-match__watching { font-size:.75rem;color:var(--text-3);display:flex;align-items:center;gap:5px; }
+    .score-row { display:flex;align-items:center;justify-content:space-around; }
+    .hero-team { display:flex;flex-direction:column;align-items:center;gap:8px; }
+    .hero-team__flag { font-size:3rem;line-height:1; }
+    .hero-team__name { font-family:var(--font-display);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em; }
+    .hero-score { font-family:var(--font-display);font-size:4rem;font-weight:900;color:var(--green);letter-spacing:-.02em;line-height:1; }
+    .hero-time { font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--green);text-align:center;margin-top:4px; }
+    .hero-match__actions { display:flex;gap:8px;margin-top:16px; }
+    .hero-match__actions .btn { flex:1;font-size:.8rem;padding:10px 8px; }
+
+    .live-scroll { display:flex;gap:10px;overflow-x:auto;padding:0 16px 4px;scrollbar-width:none; }
+    .live-scroll::-webkit-scrollbar { display:none; }
+    .mini-match { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;min-width:130px;flex-shrink:0;cursor:pointer;transition:border-color .18s; }
+    .mini-match:hover { border-color:var(--border-green); }
+    .mini-match.live { border-color:rgba(255,68,68,.35); }
+    .mini-match__teams { font-size:.78rem;color:var(--text-2);margin-bottom:6px; }
+    .mini-match__score { font-family:var(--font-display);font-size:1.1rem;font-weight:900;color:var(--green); }
+    .mini-match__time { font-size:.68rem;color:var(--text-3);margin-top:3px; }
+
+    .feed-tabs { padding:0 16px;margin-bottom:12px; }
+    .feed { display:flex;flex-direction:column;gap:12px;padding:0 16px; }
+
+    .post { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
+    .post__header { display:flex;align-items:center;gap:10px;padding:12px 14px 0; }
+    .post__name { font-weight:700;font-size:.88rem; }
+    .post__meta { font-size:.72rem;color:var(--text-3); }
+    .post__text { padding:10px 14px;font-size:.88rem;color:var(--text-2);line-height:1.6; }
+    .post__image { width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-3);display:flex;align-items:center;justify-content:center;font-size:3rem; }
+    .post__actions { display:flex;align-items:center;gap:0;border-top:1px solid var(--border); }
+    .post-action { flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;font-size:.8rem;color:var(--text-3);cursor:pointer;transition:color .15s;border:none;background:none; }
+    .post-action:hover { color:var(--green); }
+    .post-action.liked { color:var(--red); }
+  </style>
+</head>
+<body>
+
+<div class="page-top">
+  <div class="page-top__logo"><div class="page-top__logo-icon">★</div>FAN<span>ZONE</span></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
+    <div class="icon-btn" id="profileBtn" onclick="location.href='profile.html'">😎</div>
+  </div>
+</div>
+
+<!-- HERO LIVE MATCH -->
+<div class="hero-match">
+  <div class="hero-match__bg"></div>
+  <div class="hero-match__inner">
+    <div class="hero-match__top">
+      <div class="live-badge"><span class="live-dot"></span>Live</div>
+      <div class="hero-match__watching">👁 <span id="watchCount">128K</span> watching</div>
+    </div>
+    <div class="score-row">
+      <div class="hero-team"><div class="hero-team__flag">🇧🇷</div><div class="hero-team__name">Brazil</div></div>
+      <div style="text-align:center"><div class="hero-score">2 — 1</div><div class="hero-time" id="heroTime">78:23</div></div>
+      <div class="hero-team"><div class="hero-team__flag">🇦🇷</div><div class="hero-team__name">Argentina</div></div>
+    </div>
+    <div class="hero-match__actions">
+      <a href="predict.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">🎯 Predict</a>
+      <a href="predict.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">💬 Live Chat</a>
+      <a href="play.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">🎮 Play</a>
+    </div>
+  </div>
+</div>
+
+<!-- LIVE NOW -->
+<div style="margin-bottom:16px">
+  <div class="section-header"><div class="section-title">Live Now</div><div class="see-all">See All</div></div>
+  <div class="live-scroll">
+    <div class="mini-match live"><div class="mini-match__teams">🇫🇷 vs 🇩🇪</div><div class="mini-match__score" style="color:var(--text-1)">1 — 0</div><div style="display:flex;align-items:center;gap:4px;margin-top:4px"><div class="live-dot"></div><span style="font-size:.68rem;color:var(--red)">54'</span></div></div>
+    <div class="mini-match live"><div class="mini-match__teams">🇵🇹 vs 🇺🇾</div><div class="mini-match__score" style="color:var(--text-1)">0 — 0</div><div style="display:flex;align-items:center;gap:4px;margin-top:4px"><div class="live-dot"></div><span style="font-size:.68rem;color:var(--red)">38'</span></div></div>
+    <div class="mini-match"><div class="mini-match__teams">🇯🇵 vs 🇪🇸</div><div class="mini-match__score">—</div><div class="mini-match__time">19:00</div></div>
+    <div class="mini-match"><div class="mini-match__teams">🇲🇽 vs 🇺🇸</div><div class="mini-match__score">—</div><div class="mini-match__time">21:30</div></div>
+    <div class="mini-match"><div class="mini-match__teams">🇬🇧 vs 🇳🇱</div><div class="mini-match__score">—</div><div class="mini-match__time">22:00</div></div>
+  </div>
+</div>
+
+<!-- FEED TABS -->
+<div class="feed-tabs">
+  <div class="tabs">
+    <button class="tab active" onclick="switchFeedTab('foryou',this)">For You</button>
+    <button class="tab" onclick="switchFeedTab('trending',this)">Trending</button>
+    <button class="tab" onclick="switchFeedTab('following',this)">Following</button>
+  </div>
+</div>
+
+<!-- FEED -->
+<div class="feed" id="feedEl"></div>
+<div style="height:16px"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item active" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
+  <a href="clash.html" class="nav-item" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
+  <a href="predict.html" class="nav-item" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
+  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="profile.html" class="nav-item" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
+</nav>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+const app = initializeApp(FB_CONFIG);
+const auth = getAuth(app);
+onAuthStateChanged(auth, u => {
+  FZ.user = u;
+  const stats = FZ.getStats();
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(stats.xp) + ' XP';
+  const profile = FZ.getProfile();
+  if (u?.photoURL) {
+    const btn = document.getElementById('profileBtn');
+    btn.innerHTML = `<img src="${u.photoURL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover">`;
+  }
+});
+</script>
+<script>
+const POSTS = [
+  { user:'TheFootballKing', flag:'🇧🇷', emoji:'🏅', time:'2m ago', badge:'Elite Predictor', text:'WHAT A GOAL! 🔥🔥 Vinicius just put Brazil ahead! #WorldCup', likes:12400, comments:856, shares:2100, hasImg:true, imgEmoji:'⚽' },
+  { user:'PredictWizard', flag:'🇦🇷', emoji:'🧠', time:'5m ago', badge:'Tactical Genius', text:"I told you Brazil would win! 🏆💛 Called it 3 days ago. Who else had Brazil in the final?", likes:8700, comments:1240, shares:890 },
+  { user:'FootballOracle', flag:'🇩🇪', emoji:'👑', time:'8m ago', badge:null, text:'Argentina pressing high but Brazil counter-attack is absolutely lethal today. Tactical masterclass from Brazil. 🧠', likes:5400, comments:620, shares:340 },
+  { user:'GoalGuru', flag:'🇫🇷', emoji:'⭐', time:'12m ago', badge:'World Cup Prophet', text:"Messi had one of the greatest World Cup runs ever. What a legend. 🐐 #GOAT", likes:24600, comments:4100, shares:8900, hasImg:true, imgEmoji:'🐐' },
+  { user:'TacticsTalk', flag:'🇬🇧', emoji:'🎯', time:'18m ago', badge:null, text:"The penalty shootout drama never gets old. 🫀 Heart racing every single time.", likes:3200, comments:280, shares:190 },
+];
+
+function renderFeed(posts) {
+  document.getElementById('feedEl').innerHTML = posts.map((p,i) => `
+    <div class="post">
+      <div class="post__header">
+        <div class="avatar avatar--sm">${p.emoji}</div>
+        <div style="flex:1">
+          <div class="post__name">${p.user} ${p.flag} ${p.badge?`<span class="badge badge--green" style="font-size:.62rem">${p.badge}</span>`:''}</div>
+          <div class="post__meta">${p.time}</div>
+        </div>
+        <div style="font-size:1.1rem;color:var(--text-3);cursor:pointer">•••</div>
+      </div>
+      <div class="post__text">${p.text}</div>
+      ${p.hasImg?`<div class="post__image">${p.imgEmoji}</div>`:''}
+      <div class="post__actions">
+        <button class="post-action" onclick="likePost(this,${i})" data-liked="false">❤️ ${formatCount(p.likes)}</button>
+        <button class="post-action">💬 ${formatCount(p.comments)}</button>
+        <button class="post-action">↗️ ${formatCount(p.shares)}</button>
+      </div>
+    </div>`).join('');
+}
+
+function likePost(btn, idx) {
+  const liked = btn.dataset.liked === 'true';
+  btn.dataset.liked = !liked;
+  btn.classList.toggle('liked', !liked);
+  const n = parseInt(POSTS[idx].likes) + (liked ? -1 : 1);
+  btn.textContent = (liked?'❤️':'❤️') + ' ' + formatCount(n);
+  if (!liked) FZ.addXP(5);
+}
+
+function formatCount(n) { return n>=1000?(n/1000).toFixed(1).replace('.0','')+'K':n; }
+function switchFeedTab(tab, btn) {
+  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFeed(tab==='trending' ? [...POSTS].sort(()=>Math.random()-.5) : POSTS);
+}
+
+// Flicker watching count
+setInterval(()=>{
+  const n = 128000 + Math.floor((Math.random()-.5)*2000);
+  document.getElementById('watchCount').textContent = (n/1000).toFixed(0)+'K';
+}, 3000);
+
+// Live clock
+let sec = 78*60+23;
+setInterval(()=>{
+  sec++;
+  const m = Math.floor(sec/60), s = sec%60;
+  if (m <= 90) document.getElementById('heroTime').textContent = m+':'+(s<10?'0':'')+s;
+}, 1000);
+
+renderFeed(POSTS);
+</script>
+</body>
+</html>

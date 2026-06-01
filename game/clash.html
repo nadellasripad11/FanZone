@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <title>FanZone — Clash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="app.css"/>
+  <style>
+    .clash-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:0 16px 14px; }
+    .clash-card.hot { border-color:rgba(255,68,68,.4); }
+    .clash-card.trending { border-color:var(--border-green); }
+
+    .clash-card__header { padding:14px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px; }
+    .clash-card__question { font-family:var(--font-display);font-size:1.2rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;flex:1;line-height:1.3; }
+    .clash-card__tag { font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0; }
+    .tag-hot { background:var(--red-dim);border:1px solid rgba(255,68,68,.3);color:var(--red); }
+    .tag-trending { background:var(--green-dim);border:1px solid var(--border-green);color:var(--green); }
+    .tag-closed { background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-3); }
+
+    /* VS Bar */
+    .vs-bar { margin:0 14px 14px; }
+    .vs-sides { display:flex;justify-content:space-between;margin-bottom:7px; }
+    .vs-side { display:flex;flex-direction:column;gap:2px; }
+    .vs-side.right { align-items:flex-end; }
+    .vs-side__avatar { font-size:1.6rem;line-height:1; }
+    .vs-side__name { font-family:var(--font-display);font-size:.95rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em; }
+    .vs-side__pct { font-family:var(--font-display);font-size:1.5rem;font-weight:900; }
+    .vs-side__pct.left { color:var(--blue); }
+    .vs-side__pct.right { color:var(--red); }
+    .vs-bar__track { height:10px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg-3); }
+    .vs-bar__fill-a { height:100%;border-radius:6px 0 0 6px;background:var(--blue);transition:width .6s ease; }
+    .vs-bar__fill-b { height:100%;border-radius:0 6px 6px 0;background:var(--red);transition:width .6s ease; }
+    .vs-bar__meta { display:flex;justify-content:space-between;margin-top:5px;font-size:.68rem;color:var(--text-3); }
+
+    /* Vote buttons */
+    .vote-row { display:flex;gap:8px;padding:0 14px 14px; }
+    .vote-btn { flex:1;padding:11px;border-radius:var(--radius-sm);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .18s;border:1px solid var(--border);background:var(--bg-3);color:var(--text-2); }
+    .vote-btn:hover { transform:translateY(-1px); }
+    .vote-btn.voted { opacity:.7;pointer-events:none; }
+    .vote-btn.a { border-color:rgba(74,158,255,.4);color:var(--blue); }
+    .vote-btn.a:hover { background:rgba(74,158,255,.1); }
+    .vote-btn.b { border-color:rgba(255,68,68,.4);color:var(--red); }
+    .vote-btn.b:hover { background:var(--red-dim); }
+    .vote-btn.selected-a { background:rgba(74,158,255,.15);border-color:var(--blue);color:var(--blue); }
+    .vote-btn.selected-b { background:var(--red-dim);border-color:var(--red);color:var(--red); }
+
+    /* Clash chat */
+    .clash-chat { border-top:1px solid var(--border);padding:10px 14px; }
+    .chat-preview { display:flex;flex-direction:column;gap:6px;margin-bottom:10px; }
+    .chat-msg { font-size:.78rem;color:var(--text-2);line-height:1.5; }
+    .chat-msg strong { color:var(--text-1); }
+    .chat-input-row { display:flex;gap:8px; }
+    .chat-input { flex:1;background:var(--bg-3);border:1px solid var(--border);border-radius:20px;padding:9px 14px;font-size:.82rem;color:var(--text-1);outline:none; }
+    .chat-input:focus { border-color:var(--border-green); }
+    .chat-send { width:36px;height:36px;border-radius:50%;background:var(--green);color:#000;font-size:.9rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;font-weight:900; }
+
+    .section-header { margin-bottom:12px; }
+  </style>
+</head>
+<body>
+
+<div class="page-top">
+  <div class="page-top__title">⚔️ Clash</div>
+  <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
+</div>
+
+<!-- TABS -->
+<div style="padding:12px 16px 16px">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('live',this)">🔴 Live</button>
+    <button class="tab" onclick="switchTab('myVotes',this)">My Votes</button>
+    <button class="tab" onclick="switchTab('history',this)">History</button>
+  </div>
+</div>
+
+<div id="clashFeed"></div>
+<div style="height:16px"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
+  <a href="clash.html" class="nav-item active" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
+  <a href="predict.html" class="nav-item" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
+  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="profile.html" class="nav-item" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
+</nav>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+const app = initializeApp(FB_CONFIG);
+const auth = getAuth(app);
+onAuthStateChanged(auth, u => {
+  FZ.user = u;
+  const stats = FZ.getStats();
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(stats.xp) + ' XP';
+});
+</script>
+<script>
+const CLASHES = [
+  {
+    id:'goat',
+    q:'Who is the Greatest of All Time?',
+    tag:'hot',
+    tagLabel:'🔥 HOT',
+    aAvatar:'🐐', aName:'Messi', aPct:62,
+    bAvatar:'🏆', bName:'Ronaldo', bPct:38,
+    votes:'248K', time:'Live',
+    comments:[
+      {user:'TheFootballKing',flag:'🇧🇷',msg:'Messi just won the World Cup. Case closed. 🐐'},
+      {user:'CristianoFan99',flag:'🇵🇹',msg:'5 Ballon d\'Or, CL with 3 clubs. GOAT is CR7!'},
+      {user:'TacticsNerd',flag:'🇩🇪',msg:'Both are legends, stop fighting 😭'},
+    ]
+  },
+  {
+    id:'final',
+    q:'Who wins the World Cup Final?',
+    tag:'trending',
+    tagLabel:'📈 TRENDING',
+    aAvatar:'🇧🇷', aName:'Brazil', aPct:58,
+    bAvatar:'🇩🇪', bName:'Germany', bPct:42,
+    votes:'112K', time:'2h left',
+    comments:[
+      {user:'SambaSoul',flag:'🇧🇷',msg:'Brazil all day! Vini Jr is unstoppable 🔥'},
+      {user:'DFBFan',flag:'🇩🇪',msg:'Germany defense is the best in the tournament'},
+    ]
+  },
+  {
+    id:'penalty',
+    q:'Penalties or Extra Time — Which is more exciting?',
+    tag:'',
+    tagLabel:'',
+    aAvatar:'🥅', aName:'Penalties', aPct:74,
+    bAvatar:'⏱', bName:'Extra Time', bPct:26,
+    votes:'89K', time:'Ends soon',
+    comments:[
+      {user:'GoalGuru',flag:'🇫🇷',msg:'Nothing beats penalty shootout drama 🫀'},
+      {user:'PurePurist',flag:'🇬🇧',msg:'Extra time has the REAL football'},
+    ]
+  },
+  {
+    id:'era',
+    q:'Peak Barca or Invincibles Arsenal — Better era?',
+    tag:'closed',
+    tagLabel:'✓ CLOSED',
+    aAvatar:'🔵', aName:'Barca', aPct:55,
+    bAvatar:'🔴', bName:'Arsenal', bPct:45,
+    votes:'67K', time:'Finished',
+    comments:[
+      {user:'CatalanKing',flag:'🇪🇸',msg:'Xavi, Iniesta, Messi — untouchable'},
+      {user:'GoonerForever',flag:'🇬🇧',msg:'The Invincibles did the impossible!'},
+    ]
+  }
+];
+
+const userVotes = {};
+
+function renderClashes(clashes) {
+  document.getElementById('clashFeed').innerHTML = clashes.map(c => {
+    const voted = userVotes[c.id];
+    const aPct = voted ? (voted==='a'?c.aPct+2:Math.max(1,c.aPct-2)) : c.aPct;
+    const bPct = 100 - aPct;
+    return `
+    <div class="clash-card ${c.tag}" id="clash-${c.id}">
+      <div class="clash-card__header">
+        <div class="clash-card__question">${c.q}</div>
+        ${c.tag?`<div class="clash-card__tag tag-${c.tag}">${c.tagLabel}</div>`:''}
+      </div>
+
+      <div class="vs-bar">
+        <div class="vs-sides">
+          <div class="vs-side left">
+            <div class="vs-side__avatar">${c.aAvatar}</div>
+            <div class="vs-side__name">${c.aName}</div>
+            <div class="vs-side__pct left">${aPct}%</div>
+          </div>
+          <div class="vs-side right">
+            <div class="vs-side__avatar">${c.bAvatar}</div>
+            <div class="vs-side__name">${c.bName}</div>
+            <div class="vs-side__pct right">${bPct}%</div>
+          </div>
+        </div>
+        <div class="vs-bar__track">
+          <div class="vs-bar__fill-a" style="width:${aPct}%"></div>
+          <div class="vs-bar__fill-b" style="width:${bPct}%"></div>
+        </div>
+        <div class="vs-bar__meta">
+          <span>👥 ${c.votes} votes</span>
+          <span>⏱ ${c.time}</span>
+        </div>
+      </div>
+
+      ${c.tag!=='closed' ? `
+      <div class="vote-row">
+        <button class="vote-btn a ${voted==='a'?'selected-a':''} ${voted?'voted':''}" onclick="castVote('${c.id}','a',this)">${voted==='a'?'✓ ':''} ${c.aAvatar} ${c.aName}</button>
+        <button class="vote-btn b ${voted==='b'?'selected-b':''} ${voted?'voted':''}" onclick="castVote('${c.id}','b',this)">${voted==='b'?'✓ ':''} ${c.bAvatar} ${c.bName}</button>
+      </div>` : `<div style="padding:0 14px 14px;font-size:.75rem;color:var(--text-3);text-align:center">Voting has ended for this clash</div>`}
+
+      <div class="clash-chat">
+        <div class="chat-preview">
+          ${c.comments.map(m=>`<div class="chat-msg"><strong>${m.user} ${m.flag}</strong> ${m.msg}</div>`).join('')}
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" placeholder="Jump in..." id="chatInput-${c.id}" onkeydown="if(event.key==='Enter')sendChat('${c.id}')"/>
+          <button class="chat-send" onclick="sendChat('${c.id}')">↑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function castVote(id, side, btn) {
+  if (userVotes[id]) return;
+  userVotes[id] = side;
+  FZ.addXP(25);
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+  renderClashes(CLASHES);
+  setTimeout(()=>showToast('⚔️ Vote cast! +25 XP'), 100);
+}
+
+function sendChat(id) {
+  const input = document.getElementById('chatInput-'+id);
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const clash = CLASHES.find(c=>c.id===id);
+  if (clash) {
+    clash.comments.push({ user:'You', flag:'⚡', msg });
+    renderClashes(CLASHES);
+    FZ.addXP(10);
+    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+  }
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab==='live') renderClashes(CLASHES);
+  else if (tab==='myVotes') {
+    const voted = CLASHES.filter(c=>userVotes[c.id]);
+    renderClashes(voted.length ? voted : CLASHES.slice(0,1));
+    if (!voted.length) showToast('No votes yet — join a clash!');
+  } else {
+    renderClashes([CLASHES[3]]);
+  }
+}
+
+renderClashes(CLASHES);
+</script>
+</body>
+</html>

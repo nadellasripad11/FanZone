@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <title>FanZone — Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="app.css"/>
+  <style>
+    /* Mode grid */
+    .mode-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px; }
+    .mode-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden; }
+    .mode-card:hover { border-color:var(--border-green);transform:translateY(-1px); }
+    .mode-card.featured { grid-column:span 2;border-color:var(--border-green);background:linear-gradient(135deg,rgba(204,255,0,.06),var(--bg-2)); }
+    .mode-card__icon { font-size:2rem;line-height:1;margin-bottom:8px; }
+    .mode-card__title { font-family:var(--font-display);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px; }
+    .mode-card__sub { font-size:.72rem;color:var(--text-3);line-height:1.4; }
+    .mode-card__xp { position:absolute;top:10px;right:10px;font-size:.65rem;font-weight:700;color:var(--green);background:var(--green-dim);border:1px solid var(--border-green);border-radius:20px;padding:2px 7px; }
+    .mode-card__badge { position:absolute;top:10px;right:10px;font-size:.62rem;font-weight:700;color:var(--red);background:var(--red-dim);border:1px solid rgba(255,68,68,.3);border-radius:20px;padding:2px 7px; }
+
+    /* Penalty game */
+    #penaltyGame { display:none;padding:0 16px;margin-bottom:20px; }
+    .penalty-arena { background:linear-gradient(160deg,#0a1a0a,#0d1a0d);border:1px solid var(--border-green);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden; }
+    .penalty-arena::before { content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&q=30') center/cover no-repeat;opacity:.06; }
+    .penalty-arena > * { position:relative; }
+    .goal-header { font-family:var(--font-display);font-size:1.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px; }
+    .goal-sub { font-size:.78rem;color:var(--text-3);margin-bottom:20px; }
+
+    /* Goal frame */
+    .goal-frame { width:100%;max-width:300px;margin:0 auto 16px;aspect-ratio:3/2;background:rgba(0,0,0,.4);border:3px solid rgba(255,255,255,.2);border-radius:4px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;padding:6px;position:relative; }
+    .goal-zone { border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.4rem; }
+    .goal-zone:hover { background:rgba(204,255,0,.12);border-color:var(--border-green); }
+    .goal-zone.hit { background:rgba(204,255,0,.25);border-color:var(--green);animation:goalFlash .5s ease; }
+    .goal-zone.saved { background:var(--red-dim);border-color:rgba(255,68,68,.5);animation:saveFlash .5s ease; }
+    @keyframes goalFlash { 0%,100%{opacity:1} 50%{opacity:.5;transform:scale(.96)} }
+    @keyframes saveFlash { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .score-board { display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px; }
+    .score-board__you { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--green);line-height:1; }
+    .score-board__keeper { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--red);line-height:1; }
+    .score-board__dash { font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:var(--text-3); }
+    .score-board__label { font-size:.65rem;color:var(--text-3);text-align:center;margin-top:2px; }
+
+    .kick-count { font-size:.8rem;color:var(--text-3);margin-bottom:14px; }
+    .kick-count span { color:var(--text-1);font-weight:700; }
+
+    .penalty-result { font-family:var(--font-display);font-size:1.4rem;font-weight:900;min-height:36px;letter-spacing:.04em; }
+    .penalty-result.goal { color:var(--green); }
+    .penalty-result.saved { color:var(--red); }
+
+    .penalty-instruction { font-size:.8rem;color:var(--text-2);margin:8px 0 4px; }
+
+    /* Streak display */
+    .kicks-row { display:flex;gap:6px;justify-content:center;margin:10px 0; }
+    .kick-dot { width:28px;height:28px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem; }
+    .kick-dot.goal { background:rgba(204,255,0,.2);border-color:var(--border-green); }
+    .kick-dot.saved { background:var(--red-dim);border-color:rgba(255,68,68,.4); }
+  </style>
+</head>
+<body>
+
+<div class="page-top">
+  <div class="page-top__title">🎮 Play</div>
+  <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
+</div>
+
+<!-- TABS -->
+<div style="padding:12px 16px 16px">
+  <div class="tabs">
+    <button class="tab active" onclick="switchPlayTab('modes',this)">Game Modes</button>
+    <button class="tab" onclick="switchPlayTab('daily',this)">Daily Challenge</button>
+    <button class="tab" onclick="switchPlayTab('friends',this)">Friends</button>
+  </div>
+</div>
+
+<!-- GAME MODES TAB -->
+<div id="tab-modes">
+  <div class="section-header" style="padding:0 18px;margin-bottom:12px">
+    <div class="section-title">Choose Your Mode</div>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card featured" onclick="startPenalty()">
+      <div class="mode-card__xp">+50–500 XP</div>
+      <div class="mode-card__icon">🥅</div>
+      <div class="mode-card__title">Penalty Shootout</div>
+      <div class="mode-card__sub">Take 5 penalties vs a virtual keeper. Score as many as you can!</div>
+    </div>
+    <div class="mode-card" onclick="showComingSoon()">
+      <div class="mode-card__badge">⚡ Live</div>
+      <div class="mode-card__icon">⚡</div>
+      <div class="mode-card__title">Quick Match</div>
+      <div class="mode-card__sub">Fast 5-question trivia vs a random fan</div>
+    </div>
+    <div class="mode-card" onclick="showComingSoon()">
+      <div class="mode-card__xp">+200 XP</div>
+      <div class="mode-card__icon">🤝</div>
+      <div class="mode-card__title">Friend Battle</div>
+      <div class="mode-card__sub">Challenge a friend to a prediction duel</div>
+    </div>
+    <div class="mode-card" onclick="showComingSoon()">
+      <div class="mode-card__xp">+1K XP</div>
+      <div class="mode-card__icon">🏆</div>
+      <div class="mode-card__title">Tournament</div>
+      <div class="mode-card__sub">32-player bracket, represent your country</div>
+    </div>
+    <div class="mode-card" onclick="showComingSoon()">
+      <div class="mode-card__xp">+300 XP</div>
+      <div class="mode-card__icon">💀</div>
+      <div class="mode-card__title">Survival</div>
+      <div class="mode-card__sub">One wrong answer and you're out</div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY CHALLENGE TAB -->
+<div id="tab-daily" style="display:none;padding:0 16px">
+  <div style="background:var(--bg-2);border:1px solid var(--border-green);border-radius:var(--radius);padding:18px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em">Daily Trivia</div>
+      <div class="xp-pill">⚡ +100 XP</div>
+    </div>
+    <div id="quizQ" style="font-size:.95rem;font-weight:600;margin-bottom:16px;line-height:1.5"></div>
+    <div id="quizOpts" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div id="quizResult" style="min-height:20px;margin-top:12px;font-size:.82rem;font-weight:700;text-align:center"></div>
+  </div>
+  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:10px">Today's Streak Bonus</div>
+    <div style="display:flex;gap:8px">
+      ${[1,2,3,4,5,6,7].map((d,i)=>`<div style="flex:1;background:${i<3?'rgba(204,255,0,.15)':'var(--bg-3)'};border:1px solid ${i<3?'var(--border-green)':'var(--border)'};border-radius:6px;padding:8px 4px;text-align:center;font-size:.7rem;color:${i<3?'var(--green)':'var(--text-3)'}"><div>${['M','T','W','T','F','S','S'][i]}</div><div>${i<3?'✓':'·'}</div></div>`).join('')}
+    </div>
+    <div style="font-size:.72rem;color:var(--text-3);margin-top:10px;text-align:center">3-day streak · +30 bonus XP</div>
+  </div>
+</div>
+
+<!-- FRIENDS TAB -->
+<div id="tab-friends" style="display:none;padding:0 16px">
+  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;margin-top:4px">
+    <div style="font-size:3rem;margin-bottom:12px">👥</div>
+    <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Invite Friends</div>
+    <div style="font-size:.82rem;color:var(--text-2);line-height:1.6;margin-bottom:16px">Challenge friends to prediction battles. Get +200 XP when a friend joins FanZone!</div>
+    <button class="btn btn--primary btn--full" onclick="showToast('📋 Invite link copied!')">🔗 Copy Invite Link</button>
+  </div>
+  <div style="margin-top:14px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Recent Challengers</div>
+    ${[{n:'TheFootballKing',f:'🇧🇷',r:'won 3-1'},{n:'PredictWizard',f:'🇦🇷',r:'lost 2-4'},{n:'TacticsTalk',f:'🇬🇧',r:'tied 3-3'}].map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="avatar avatar--sm">${p.f}</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:.85rem">${p.n}</div><div style="font-size:.7rem;color:var(--text-3)">${p.r}</div></div>
+      <button class="btn btn--ghost" style="padding:8px 14px;font-size:.75rem" onclick="showToast('Challenge sent!')">Rematch</button>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- PENALTY GAME OVERLAY -->
+<div id="penaltyGame">
+  <div class="penalty-arena">
+    <div class="goal-header" id="penTitle">Penalty Shootout</div>
+    <div class="goal-sub" id="penSub">Pick your spot — score 5 penalties!</div>
+
+    <div class="score-board">
+      <div>
+        <div class="score-board__you" id="penYou">0</div>
+        <div class="score-board__label">You</div>
+      </div>
+      <div class="score-board__dash">—</div>
+      <div>
+        <div class="score-board__keeper" id="penKeeper">0</div>
+        <div class="score-board__label">Keeper</div>
+      </div>
+    </div>
+
+    <div class="kick-count">Kick <span id="kickNum">1</span> of 5</div>
+    <div class="kicks-row" id="kickDots"></div>
+    <div class="penalty-result" id="penResult"></div>
+    <div class="penalty-instruction" id="penInstruction">👆 Tap a zone to shoot</div>
+
+    <div class="goal-frame" id="goalFrame">
+      <div class="goal-zone" onclick="shoot(0)"></div>
+      <div class="goal-zone" onclick="shoot(1)"></div>
+      <div class="goal-zone" onclick="shoot(2)"></div>
+      <div class="goal-zone" onclick="shoot(3)"></div>
+      <div class="goal-zone" onclick="shoot(4)"></div>
+      <div class="goal-zone" onclick="shoot(5)"></div>
+    </div>
+
+    <button class="btn btn--ghost btn--full" id="penClose" onclick="closePenalty()" style="margin-top:10px;display:none">✕ Close</button>
+    <button class="btn btn--primary btn--full" id="penRestart" onclick="restartPenalty()" style="margin-top:10px;display:none">🔄 Play Again</button>
+  </div>
+</div>
+
+<div style="height:16px"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
+  <a href="clash.html" class="nav-item" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
+  <a href="predict.html" class="nav-item" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
+  <a href="play.html" class="nav-item active" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="profile.html" class="nav-item" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
+</nav>
+
+<script src="app.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+const app = initializeApp(FB_CONFIG);
+const auth = getAuth(app);
+onAuthStateChanged(auth, u => {
+  FZ.user = u;
+  const stats = FZ.getStats();
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(stats.xp) + ' XP';
+});
+</script>
+<script>
+// ── PENALTY GAME ──
+let penState = { goals:0, saves:0, kick:0, done:false, history:[] };
+const TOTAL_KICKS = 5;
+const SAVE_CHANCE = 0.35;
+const SAVE_MSGS = ['🧤 Saved!','Keeper dives right!','What a save!','Blocked!','No way!'];
+const GOAL_MSGS = ['⚽ GOAL!','Top bins!','Net buster!','GOLAZO!','What a strike!'];
+const ZONES = ['↖','↑','↗','↙','↓','↘'];
+
+function startPenalty() {
+  restartPenalty();
+  document.getElementById('penaltyGame').style.display = 'block';
+  document.getElementById('tab-modes').style.display = 'none';
+  document.getElementById('penaltyGame').scrollIntoView({behavior:'smooth'});
+}
+
+function closePenalty() {
+  document.getElementById('penaltyGame').style.display = 'none';
+  document.getElementById('tab-modes').style.display = 'block';
+  penState = { goals:0, saves:0, kick:0, done:false, history:[] };
+}
+
+function restartPenalty() {
+  penState = { goals:0, saves:0, kick:0, done:false, history:[] };
+  document.getElementById('penYou').textContent = '0';
+  document.getElementById('penKeeper').textContent = '0';
+  document.getElementById('kickNum').textContent = '1';
+  document.getElementById('penResult').textContent = '';
+  document.getElementById('penResult').className = 'penalty-result';
+  document.getElementById('penInstruction').textContent = '👆 Tap a zone to shoot';
+  document.getElementById('penClose').style.display = 'none';
+  document.getElementById('penRestart').style.display = 'none';
+  document.getElementById('penTitle').textContent = 'Penalty Shootout';
+  document.getElementById('penSub').textContent = 'Pick your spot — score 5 penalties!';
+  renderKickDots();
+  enableZones(true);
+}
+
+function renderKickDots() {
+  const dots = document.getElementById('kickDots');
+  dots.innerHTML = Array.from({length:TOTAL_KICKS},(_, i)=>{
+    const h = penState.history[i];
+    return `<div class="kick-dot ${h==='goal'?'goal':h==='saved'?'saved':''}">${h==='goal'?'⚽':h==='saved'?'🧤':i===penState.kick&&!penState.done?'👟':''}</div>`;
+  }).join('');
+}
+
+function enableZones(on) {
+  document.querySelectorAll('.goal-zone').forEach(z=>{
+    z.style.pointerEvents = on ? 'auto' : 'none';
+    z.innerHTML = on ? ZONES[Array.from(document.querySelectorAll('.goal-zone')).indexOf(z)] : '';
+  });
+}
+
+function shoot(zone) {
+  if (penState.done || penState.kick >= TOTAL_KICKS) return;
+  enableZones(false);
+
+  const zones = document.querySelectorAll('.goal-zone');
+  const saved = Math.random() < SAVE_CHANCE;
+  const resultEl = document.getElementById('penResult');
+  const zoneEl = zones[zone];
+
+  if (saved) {
+    penState.saves++;
+    penState.history.push('saved');
+    zoneEl.classList.add('saved');
+    zoneEl.textContent = '🧤';
+    resultEl.textContent = SAVE_MSGS[Math.floor(Math.random()*SAVE_MSGS.length)];
+    resultEl.className = 'penalty-result saved';
+    document.getElementById('penKeeper').textContent = penState.saves;
+  } else {
+    penState.goals++;
+    penState.history.push('goal');
+    zoneEl.classList.add('hit');
+    zoneEl.textContent = '⚽';
+    resultEl.textContent = GOAL_MSGS[Math.floor(Math.random()*GOAL_MSGS.length)];
+    resultEl.className = 'penalty-result goal';
+    document.getElementById('penYou').textContent = penState.goals;
+  }
+
+  penState.kick++;
+  renderKickDots();
+
+  setTimeout(()=>{
+    zoneEl.classList.remove('hit','saved');
+    if (penState.kick >= TOTAL_KICKS) {
+      endPenalty();
+    } else {
+      document.getElementById('kickNum').textContent = penState.kick + 1;
+      document.getElementById('penInstruction').textContent = '👆 Tap a zone to shoot';
+      enableZones(true);
+      resultEl.textContent = '';
+      resultEl.className = 'penalty-result';
+    }
+  }, 1000);
+}
+
+function endPenalty() {
+  penState.done = true;
+  const g = penState.goals;
+  const xp = g * 100;
+  const msgs = ['Better luck next time!','Not bad, keep practicing!','Decent effort!','Great shooting!','Incredible — Perfect score! 🏆'];
+  document.getElementById('penTitle').textContent = g >= 4 ? '🏆 Outstanding!' : g >= 3 ? '⚽ Well Done!' : '💪 Keep Practicing!';
+  document.getElementById('penSub').textContent = `${g}/5 goals · ${msgs[g]}`;
+  document.getElementById('penInstruction').textContent = '';
+  document.getElementById('penClose').style.display = 'block';
+  document.getElementById('penRestart').style.display = 'block';
+  if (xp > 0) {
+    FZ.addXP(xp);
+    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+    setTimeout(()=>showToast('⚽ ' + g + '/5 goals · +' + xp + ' XP!'), 400);
+  } else {
+    showToast('0/5 goals — try again!');
+  }
+  renderKickDots();
+}
+
+// ── DAILY TRIVIA ──
+const QUIZ = [
+  { q:'How many times has Brazil won the FIFA World Cup?', opts:['4','5','6','3'], ans:1 },
+  { q:'Which country hosted the 2022 FIFA World Cup?', opts:['Saudi Arabia','Qatar','UAE','Bahrain'], ans:1 },
+  { q:'Who scored the most goals in a single World Cup tournament?', opts:['Pelé','Ronaldo','Just Fontaine','Gerd Müller'], ans:2 },
+  { q:'What year did Messi finally win the World Cup?', opts:['2018','2022','2026','2014'], ans:1 },
+  { q:'Which team is nicknamed "The Seleção"?', opts:['Argentina','Portugal','Brazil','Spain'], ans:2 },
+];
+let quizDone = false;
+const todayQ = QUIZ[new Date().getDay() % QUIZ.length];
+
+function initQuiz() {
+  document.getElementById('quizQ').textContent = todayQ.q;
+  document.getElementById('quizOpts').innerHTML = todayQ.opts.map((o,i)=>`
+    <button class="btn btn--ghost btn--full" style="text-align:left;justify-content:flex-start;padding:12px 14px;font-size:.85rem" onclick="answerQuiz(${i},this)">${String.fromCharCode(65+i)}. ${o}</button>`).join('');
+}
+
+function answerQuiz(idx, btn) {
+  if (quizDone) return;
+  quizDone = true;
+  const btns = document.querySelectorAll('#quizOpts .btn');
+  btns.forEach((b,i)=>{
+    b.style.pointerEvents='none';
+    if (i===todayQ.ans) { b.style.borderColor='var(--green)';b.style.color='var(--green)'; }
+    else if (i===idx && idx!==todayQ.ans) { b.style.borderColor='var(--red)';b.style.color='var(--red)'; }
+  });
+  const correct = idx === todayQ.ans;
+  const resultEl = document.getElementById('quizResult');
+  if (correct) {
+    resultEl.textContent = '✅ Correct! +100 XP';
+    resultEl.style.color = 'var(--green)';
+    FZ.addXP(100);
+    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+  } else {
+    resultEl.textContent = '❌ Wrong! Better luck tomorrow.';
+    resultEl.style.color = 'var(--red)';
+  }
+}
+
+function switchPlayTab(tab, btn) {
+  ['modes','daily','friends'].forEach(t=>{
+    const el = document.getElementById('tab-'+t);
+    if (el) el.style.display = t===tab?'block':'none';
+  });
+  document.getElementById('penaltyGame').style.display = 'none';
+  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab==='daily') initQuiz();
+}
+
+function showComingSoon() { showToast('🚀 Coming soon — stay tuned!'); }
+
+initQuiz();
+</script>
+</body>
+</html>
