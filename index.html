@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FanZone — The world's football fans. One stadium. Predict, Debate, Play, Connect for the 2026 FIFA World Cup." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>FanZone — One World. One Stadium. | 2026 FIFA World Cup</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="FanZone — One World. One Stadium." />
+  <meta property="og:description" content="Predict. Debate. Play. Connect. The ultimate football fan experience for the 2026 FIFA World Cup." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════
+       NAVIGATION
+  ═══════════════════════════════════ -->
+  <nav class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#" class="nav__logo" aria-label="FanZone Home">
+        <div class="nav__logo-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="15" stroke="#CCFF00" stroke-width="2"/>
+            <path d="M16 4 L19 12 L28 12 L21 18 L24 26 L16 20 L8 26 L11 18 L4 12 L13 12 Z" fill="#CCFF00"/>
+          </svg>
+        </div>
+        <span class="nav__logo-text">FANZONE</span>
+      </a>
+
+      <ul class="nav__links" id="navLinks">
+        <li><a href="#features" class="nav__link">Features</a></li>
+        <li><a href="#how-it-works" class="nav__link">How It Works</a></li>
+        <li><a href="#community" class="nav__link">Community</a></li>
+        <li><a href="#about" class="nav__link">About</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <a href="game/index.html" class="btn btn--outline">Get Started</a>
+        <button class="nav__hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="nav__mobile" id="mobileMenu">
+      <ul>
+        <li><a href="#features" class="nav__link">Features</a></li>
+        <li><a href="#how-it-works" class="nav__link">How It Works</a></li>
+        <li><a href="#community" class="nav__link">Community</a></li>
+        <li><a href="#about" class="nav__link">About</a></li>
+        <li><a href="game/index.html" class="btn btn--outline btn--full">Get Started</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ═══════════════════════════════════
+         HERO
+    ═══════════════════════════════════ -->
+    <section class="hero" id="hero">
+      <div class="hero__bg">
+        <div class="hero__lights"></div>
+        <div class="hero__particles" id="particles"></div>
+      </div>
+
+      <div class="hero__inner">
+        <div class="hero__content">
+          <div class="hero__badge" data-animate="fade-up">
+            <span class="hero__badge-icon">🏆</span>
+            <span>2026 FIFA WORLD CUP</span>
+          </div>
+
+          <h1 class="hero__headline" data-animate="fade-up" data-delay="100">
+            <span class="hero__headline-white">ONE WORLD.</span>
+            <span class="hero__headline-green">ONE STADIUM.</span>
+          </h1>
+
+          <p class="hero__sub" data-animate="fade-up" data-delay="200">
+            Predict. Debate. Play. Connect.<br />The ultimate fan experience.
+          </p>
+
+          <div class="hero__cta" data-animate="fade-up" data-delay="300">
+            <a href="game/index.html" class="btn btn--solid">Get Started Free →</a>
+            <a href="#how-it-works" class="btn btn--outline">How It Works</a>
+          </div>
+        </div>
+
+        <!-- Phone Mockups -->
+        <div class="hero__phones" data-animate="fade-up" data-delay="150">
+          <div class="phone phone--left">
+            <div class="phone__frame">
+              <div class="phone__screen">
+                <div class="phone__notch"></div>
+
+                <div class="phone__app-bar">
+                  <div class="phone__app-logo">
+                    <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#CCFF00" stroke-width="1.5"/><path d="M8 2 L9.5 6 L14 6 L10.5 9 L12 13 L8 10 L4 13 L5.5 9 L2 6 L6.5 6 Z" fill="#CCFF00"/></svg>
+                    FANZONE
+                  </div>
+                  <div class="phone__notif">🔔</div>
+                </div>
+
+                <div class="phone__live-card">
+                  <div class="phone__live-badge">
+                    <span class="live-dot"></span> LIVE
+                    <span class="phone__live-time">78:45</span>
+                  </div>
+                  <div class="phone__match">
+                    <div class="phone__team">
+                      <span class="phone__flag">🇧🇷</span>
+                      <span class="phone__team-name">Brazil</span>
+                    </div>
+                    <div class="phone__score">
+                      <span class="phone__score-num">2</span>
+                      <span class="phone__score-sep">-</span>
+                      <span class="phone__score-num">1</span>
+                    </div>
+                    <div class="phone__team">
+                      <span class="phone__flag">🇦🇷</span>
+                      <span class="phone__team-name">Argentina</span>
+                    </div>
+                  </div>
+                  <div class="phone__viewers">👁 129K watching</div>
+                </div>
+
+                <div class="phone__avatars">
+                  <div class="phone__avatar-row">
+                    <span class="phone__avatar">👤</span>
+                    <span class="phone__avatar">👤</span>
+                    <span class="phone__avatar">👤</span>
+                    <span class="phone__avatar">👤</span>
+                    <span class="phone__avatar">👤</span>
+                    <span class="phone__avatar-more">+2.4K</span>
+                  </div>
+                </div>
+
+                <div class="phone__trending-label">
+                  Trending Now
+                  <span class="phone__trending-tabs">
+                    <span class="phone__tab active">Debates</span>
+                    <span class="phone__tab">#Predictions</span>
+                  </span>
+                </div>
+
+                <div class="phone__debate-card">
+                  <div class="phone__debate-badge">Debate Highlight</div>
+                  <div class="phone__debate-faces">
+                    <span class="phone__face">⚽</span>
+                    <span class="phone__face">🥅</span>
+                  </div>
+                  <div class="phone__debate-title">Messi vs Ronaldo</div>
+                  <div class="phone__debate-stats">
+                    <span>💬 6.3K</span>
+                    <span>❤️ 12.7K</span>
+                  </div>
+                </div>
+
+                <div class="phone__bottom-nav">
+                  <div class="phone__nav-item active">🏠<span>Home</span></div>
+                  <div class="phone__nav-item">⚔️<span>Clash</span></div>
+                  <div class="phone__nav-item">🎯<span>Predict</span></div>
+                  <div class="phone__nav-item">🎮<span>Play</span></div>
+                  <div class="phone__nav-item">👤<span>Profile</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone phone--right">
+            <div class="phone__frame">
+              <div class="phone__screen">
+                <div class="phone__notch"></div>
+
+                <div class="phone__predict-header">
+                  <div class="phone__predict-back">←</div>
+                  <div class="phone__predict-title">PREDICT</div>
+                </div>
+
+                <div class="phone__countdown">
+                  <div class="phone__countdown-label">UNTIL KICK OFF</div>
+                  <div class="phone__countdown-time">02h : 45m</div>
+                </div>
+
+                <div class="phone__predict-match">
+                  <div class="phone__predict-team">
+                    <span class="phone__predict-flag">🇫🇷</span>
+                    <span class="phone__predict-name">FRANCE</span>
+                  </div>
+                  <div class="phone__predict-vs">VS</div>
+                  <div class="phone__predict-team">
+                    <span class="phone__predict-flag">🇩🇪</span>
+                    <span class="phone__predict-name">GERMANY</span>
+                  </div>
+                </div>
+
+                <div class="phone__predict-options">
+                  <div class="phone__predict-label">Predict the Winner</div>
+                  <div class="phone__predict-btns">
+                    <button class="phone__predict-btn active">France</button>
+                    <button class="phone__predict-btn">Draw</button>
+                    <button class="phone__predict-btn">Germany</button>
+                  </div>
+                </div>
+
+                <div class="phone__confidence">
+                  <div class="phone__confidence-label">Confidence</div>
+                  <div class="phone__confidence-bar">
+                    <div class="phone__confidence-fill" style="width:80%"></div>
+                  </div>
+                  <div class="phone__confidence-val">80%</div>
+                </div>
+
+                <button class="phone__submit-btn">
+                  Submit Prediction
+                  <span class="phone__xp">+50 XP</span>
+                </button>
+
+                <div class="phone__bottom-nav">
+                  <div class="phone__nav-item">🏠<span>Home</span></div>
+                  <div class="phone__nav-item">⚔️<span>Clash</span></div>
+                  <div class="phone__nav-item active">🎯<span>Predict</span></div>
+                  <div class="phone__nav-item">🎮<span>Play</span></div>
+                  <div class="phone__nav-item">👤<span>Profile</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="hero__scroll">
+        <div class="hero__scroll-line"></div>
+        <span>Scroll</span>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         LIVE TICKER
+    ═══════════════════════════════════ -->
+    <div class="ticker" aria-label="Live match updates">
+      <div class="ticker__label">
+        <span class="live-dot"></span> LIVE
+      </div>
+      <div class="ticker__track">
+        <div class="ticker__inner" id="tickerInner">
+          <span>🇧🇷 Brazil 2–1 Argentina 🇦🇷 &nbsp;•&nbsp; 78'</span>
+          <span>🇫🇷 France 0–0 Germany 🇩🇪 &nbsp;•&nbsp; 34'</span>
+          <span>🇵🇹 Portugal 3–2 Spain 🇪🇸 &nbsp;•&nbsp; FT</span>
+          <span>🏆 2026 FIFA World Cup &nbsp;•&nbsp; Group Stage</span>
+          <span>🔥 142K fans active right now</span>
+          <span>⚡ 89K predictions submitted today</span>
+          <span>🇧🇷 Brazil 2–1 Argentina 🇦🇷 &nbsp;•&nbsp; 78'</span>
+          <span>🇫🇷 France 0–0 Germany 🇩🇪 &nbsp;•&nbsp; 34'</span>
+          <span>🇵🇹 Portugal 3–2 Spain 🇪🇸 &nbsp;•&nbsp; FT</span>
+          <span>🏆 2026 FIFA World Cup &nbsp;•&nbsp; Group Stage</span>
+          <span>🔥 142K fans active right now</span>
+          <span>⚡ 89K predictions submitted today</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         FEATURES
+    ═══════════════════════════════════ -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="features__grid">
+
+          <div class="feature-card" data-animate="fade-up" data-delay="0">
+            <div class="feature-card__icon feature-card__icon--predict">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 4L28 16H41L31 23L35 36L24 28L13 36L17 23L7 16H20L24 4Z" stroke="#FFD700" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <h3 class="feature-card__title">PREDICT</h3>
+            <p class="feature-card__desc">Make your predictions and earn XP</p>
+          </div>
+
+          <div class="feature-card" data-animate="fade-up" data-delay="80">
+            <div class="feature-card__icon feature-card__icon--clash">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="8" y1="40" x2="40" y2="8" stroke="#FF4444" stroke-width="3" stroke-linecap="round"/>
+                <line x1="40" y1="40" x2="8" y2="8" stroke="#FF4444" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="8" cy="8" r="4" fill="#FF4444"/>
+                <circle cx="40" cy="40" r="4" fill="#FF4444"/>
+                <circle cx="40" cy="8" r="4" fill="#FF4444"/>
+                <circle cx="8" cy="40" r="4" fill="#FF4444"/>
+              </svg>
+            </div>
+            <h3 class="feature-card__title">CLASH</h3>
+            <p class="feature-card__desc">Debate fans in real-time and win votes</p>
+          </div>
+
+          <div class="feature-card feature-card--highlighted" data-animate="fade-up" data-delay="160">
+            <div class="feature-card__icon feature-card__icon--play">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="14" width="36" height="24" rx="6" stroke="#4488FF" stroke-width="2.5"/>
+                <circle cx="16" cy="26" r="3" fill="#4488FF"/>
+                <circle cx="24" cy="20" r="2" fill="#4488FF"/>
+                <circle cx="24" cy="32" r="2" fill="#4488FF"/>
+                <circle cx="32" cy="26" r="3" fill="#4488FF"/>
+                <line x1="12" y1="8" x2="12" y2="14" stroke="#4488FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="36" y1="8" x2="36" y2="14" stroke="#4488FF" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-card__title">PLAY</h3>
+            <p class="feature-card__desc">Play games, compete and climb the ranks</p>
+          </div>
+
+          <div class="feature-card" data-animate="fade-up" data-delay="240">
+            <div class="feature-card__icon feature-card__icon--connect">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="18" r="7" stroke="#FF8800" stroke-width="2.5"/>
+                <circle cx="32" cy="18" r="7" stroke="#FF8800" stroke-width="2.5"/>
+                <path d="M4 40c0-7 5.4-12 12-12h16c6.6 0 12 5 12 12" stroke="#FF8800" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-card__title">CONNECT</h3>
+            <p class="feature-card__desc">Join communities and make real connections</p>
+          </div>
+
+          <div class="feature-card" data-animate="fade-up" data-delay="320">
+            <div class="feature-card__icon feature-card__icon--share">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="38" cy="10" r="6" stroke="#AA44FF" stroke-width="2.5"/>
+                <circle cx="10" cy="24" r="6" stroke="#AA44FF" stroke-width="2.5"/>
+                <circle cx="38" cy="38" r="6" stroke="#AA44FF" stroke-width="2.5"/>
+                <line x1="16" y1="21" x2="32" y2="13" stroke="#AA44FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="16" y1="27" x2="32" y2="35" stroke="#AA44FF" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="feature-card__title">SHARE</h3>
+            <p class="feature-card__desc">Create, share and go viral with fans worldwide</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         HOW IT WORKS
+    ═══════════════════════════════════ -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="container">
+        <div class="section-header" data-animate="fade-up">
+          <div class="section-tag">HOW IT WORKS</div>
+          <h2 class="section-title">Your Stadium.<br /><span class="text-green">Your Rules.</span></h2>
+        </div>
+
+        <div class="steps">
+          <div class="step" data-animate="fade-up" data-delay="0">
+            <div class="step__number">01</div>
+            <div class="step__content">
+              <h3>Pick Your Side</h3>
+              <p>Choose your country, pick your team, and declare your allegiance. Your identity is your battle flag in FanZone.</p>
+            </div>
+          </div>
+          <div class="step__connector"></div>
+          <div class="step" data-animate="fade-up" data-delay="100">
+            <div class="step__number">02</div>
+            <div class="step__content">
+              <h3>Go Live</h3>
+              <p>Join live matches, react in real-time, flood the chat with emojis, and let the stadium hear you roar.</p>
+            </div>
+          </div>
+          <div class="step__connector"></div>
+          <div class="step" data-animate="fade-up" data-delay="200">
+            <div class="step__number">03</div>
+            <div class="step__content">
+              <h3>Rise the Ranks</h3>
+              <p>Earn XP, climb leaderboards, collect badges and become the Football Oracle your country deserves.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         LIVE EXPERIENCE BANNER
+    ═══════════════════════════════════ -->
+    <section class="banner" id="community">
+      <div class="banner__bg">
+        <div class="banner__stadium-overlay"></div>
+        <div class="banner__gradient"></div>
+      </div>
+      <div class="container">
+        <div class="banner__inner">
+          <div class="banner__content" data-animate="fade-up">
+            <h2 class="banner__title">
+              LIVE THE WORLD CUP<br />
+              LIKE <span class="text-green">NEVER</span> BEFORE
+            </h2>
+            <p class="banner__desc">
+              Real-time matches, live debates, predictions, games and a global community of fans.
+            </p>
+            <a href="#download" class="btn btn--solid">Join FanZone Now</a>
+          </div>
+          <div class="banner__visual" data-animate="fade-up" data-delay="100">
+            <div class="banner__stadium-art">
+              <div class="stadium-ring stadium-ring--1"></div>
+              <div class="stadium-ring stadium-ring--2"></div>
+              <div class="stadium-ring stadium-ring--3"></div>
+              <div class="stadium-center">
+                <div class="stadium-ball">⚽</div>
+                <div class="stadium-pulse"></div>
+              </div>
+              <div class="stadium-fans">
+                <span>🇧🇷</span><span>🇦🇷</span><span>🇫🇷</span>
+                <span>🇩🇪</span><span>🇵🇹</span><span>🇪🇸</span>
+                <span>🇬🇧</span><span>🇮🇹</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         FEATURES DEEP DIVE
+    ═══════════════════════════════════ -->
+    <section class="deep-features" id="about">
+      <div class="container">
+        <div class="section-header" data-animate="fade-up">
+          <div class="section-tag">FEATURES</div>
+          <h2 class="section-title">Everything a Fan<br /><span class="text-green">Could Ever Want</span></h2>
+        </div>
+
+        <div class="deep-features__grid">
+          <div class="deep-feature" data-animate="fade-up" data-delay="0">
+            <div class="deep-feature__icon">🎯</div>
+            <h3>Predict & Win XP</h3>
+            <p>Predict match winners, exact scores, first goal scorers and more. No cash, no gambling — pure football knowledge. Earn ranks from Casual Fan to Football Oracle.</p>
+            <div class="deep-feature__tags">
+              <span>Confidence Slider</span>
+              <span>XP System</span>
+              <span>Leaderboards</span>
+            </div>
+          </div>
+
+          <div class="deep-feature" data-animate="fade-up" data-delay="80">
+            <div class="deep-feature__icon">⚔️</div>
+            <h3>Clash in Live Debates</h3>
+            <p>30-second battle rounds. Messi vs Ronaldo. Best XI ever. Biggest upsets. The crowd votes. You go live. Pure chaos, pure football.</p>
+            <div class="deep-feature__tags">
+              <span>Voice Rooms</span>
+              <span>Fan Voting</span>
+              <span>Roulette Drop</span>
+            </div>
+          </div>
+
+          <div class="deep-feature" data-animate="fade-up" data-delay="160">
+            <div class="deep-feature__icon">🎮</div>
+            <h3>Penalty Shootout</h3>
+            <p>Swipe to shoot. Tap to save. Quick rounds, dramatic slow-mo saves, crowd reactions and stadium lights. The most addictive 30 seconds in football.</p>
+            <div class="deep-feature__tags">
+              <span>Quick Match</span>
+              <span>Friend Battle</span>
+              <span>Country Tournament</span>
+            </div>
+          </div>
+
+          <div class="deep-feature" data-animate="fade-up" data-delay="240">
+            <div class="deep-feature__icon">🔥</div>
+            <h3>Go Viral Instantly</h3>
+            <p>One-tap export. Auto captions, score overlays, country branding. Ship your reaction clip to TikTok, Reels or Shorts in seconds. Built for virality.</p>
+            <div class="deep-feature__tags">
+              <span>TikTok Export</span>
+              <span>Reels</span>
+              <span>Auto Captions</span>
+            </div>
+          </div>
+
+          <div class="deep-feature" data-animate="fade-up" data-delay="320">
+            <div class="deep-feature__icon">🏟️</div>
+            <h3>Live Match Rooms</h3>
+            <p>Every match gets its own dedicated arena. Live chat, emoji floods, polls, prediction trackers, trending reactions. Be there — without being there.</p>
+            <div class="deep-feature__tags">
+              <span>Live Chat</span>
+              <span>Emoji Floods</span>
+              <span>Match Polls</span>
+            </div>
+          </div>
+
+          <div class="deep-feature" data-animate="fade-up" data-delay="400">
+            <div class="deep-feature__icon">🏆</div>
+            <h3>Country Wars</h3>
+            <p>Your predictions, your debates, your penalty scores — all count toward your country's total dominance score. 32 nations. One crown. Go earn it.</p>
+            <div class="deep-feature__tags">
+              <span>Country Ranking</span>
+              <span>Group XP</span>
+              <span>Nation Badges</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         STATS
+    ═══════════════════════════════════ -->
+    <section class="stats">
+      <div class="container">
+        <div class="stats__grid">
+          <div class="stat" data-animate="counter" data-target="1000000" data-delay="0">
+            <div class="stat__number" data-count="1000000">1M+</div>
+            <div class="stat__label">ACTIVE FANS</div>
+          </div>
+          <div class="stat" data-animate="counter" data-target="500000" data-delay="100">
+            <div class="stat__number stat__number--green" data-count="500000">500K+</div>
+            <div class="stat__label">PREDICTIONS DAILY</div>
+          </div>
+          <div class="stat" data-animate="counter" data-target="250000" data-delay="200">
+            <div class="stat__number" data-count="250000">250K+</div>
+            <div class="stat__label">DEBATES DAILY</div>
+          </div>
+          <div class="stat" data-animate="counter" data-target="100000" data-delay="300">
+            <div class="stat__number stat__number--green" data-count="100000">100K+</div>
+            <div class="stat__label">GAMES PLAYED</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         RANKS SHOWCASE
+    ═══════════════════════════════════ -->
+    <section class="ranks">
+      <div class="container">
+        <div class="section-header" data-animate="fade-up">
+          <div class="section-tag">RANKINGS</div>
+          <h2 class="section-title">Earn Your <span class="text-green">Legend</span> Status</h2>
+          <p class="section-sub">Zero pay-to-win. Every badge, border and title earned through pure football knowledge.</p>
+        </div>
+
+        <div class="ranks__track" data-animate="fade-up" data-delay="100">
+          <div class="rank-badge rank-badge--1">
+            <div class="rank-badge__icon">⚽</div>
+            <div class="rank-badge__name">Casual Fan</div>
+            <div class="rank-badge__xp">0 XP</div>
+          </div>
+          <div class="ranks__arrow">→</div>
+          <div class="rank-badge rank-badge--2">
+            <div class="rank-badge__icon">📊</div>
+            <div class="rank-badge__name">Analyst</div>
+            <div class="rank-badge__xp">500 XP</div>
+          </div>
+          <div class="ranks__arrow">→</div>
+          <div class="rank-badge rank-badge--3">
+            <div class="rank-badge__icon">🧠</div>
+            <div class="rank-badge__name">Tactical Genius</div>
+            <div class="rank-badge__xp">2K XP</div>
+          </div>
+          <div class="ranks__arrow">→</div>
+          <div class="rank-badge rank-badge--4">
+            <div class="rank-badge__icon">⭐</div>
+            <div class="rank-badge__name">Elite Predictor</div>
+            <div class="rank-badge__xp">10K XP</div>
+          </div>
+          <div class="ranks__arrow">→</div>
+          <div class="rank-badge rank-badge--5">
+            <div class="rank-badge__icon">🌍</div>
+            <div class="rank-badge__name">World Class</div>
+            <div class="rank-badge__xp">50K XP</div>
+          </div>
+          <div class="ranks__arrow">→</div>
+          <div class="rank-badge rank-badge--6">
+            <div class="rank-badge__icon">🔮</div>
+            <div class="rank-badge__name">Football Oracle</div>
+            <div class="rank-badge__xp">200K XP</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         GET STARTED / CTA
+    ═══════════════════════════════════ -->
+    <section class="download" id="get-started">
+      <div class="download__bg">
+        <div class="download__glow download__glow--left"></div>
+        <div class="download__glow download__glow--right"></div>
+      </div>
+      <div class="container">
+        <div class="download__inner" style="justify-content:center;text-align:center;flex-direction:column;align-items:center;gap:32px">
+          <div class="download__content" data-animate="fade-up" style="max-width:620px">
+            <h2 class="download__title">
+              READY TO BE PART OF<br />
+              <span class="text-green">FOOTBALL HISTORY?</span>
+            </h2>
+            <p class="download__desc">
+              Join millions of fans predicting, debating, and celebrating the 2026 World Cup together. Free to play, no download needed.
+            </p>
+            <div class="download__stores" style="justify-content:center;flex-wrap:wrap;gap:16px">
+              <a href="game/index.html" class="btn btn--solid btn--store-large" style="padding:18px 44px;font-size:1.1rem;letter-spacing:.04em">
+                ⚽ Get Started Free
+              </a>
+              <a href="#how-it-works" class="btn btn--outline btn--store-large" style="padding:18px 36px;font-size:1.05rem">
+                See How It Works
+              </a>
+            </div>
+            <p style="margin-top:20px;font-size:.82rem;color:var(--text-muted)">No sign-up required to explore · Free forever · No gambling · No real money</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <a href="#" class="nav__logo footer__logo">
+            <div class="nav__logo-icon">
+              <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#CCFF00" stroke-width="2"/><path d="M16 4 L19 12 L28 12 L21 18 L24 26 L16 20 L8 26 L11 18 L4 12 L13 12 Z" fill="#CCFF00"/></svg>
+            </div>
+            <span class="nav__logo-text">FANZONE</span>
+          </a>
+          <p class="footer__tagline">The world's football fans.<br />One stadium.</p>
+          <div class="footer__socials">
+            <a href="#" class="footer__social" aria-label="Twitter/X">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="#" class="footer__social" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+            <a href="#" class="footer__social" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.36a8.16 8.16 0 004.77 1.52V7.44a4.85 4.85 0 01-1-.75z"/></svg>
+            </a>
+            <a href="#" class="footer__social" aria-label="YouTube">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer__links-group">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="game/index.html">Get Started</a></li>
+            <li><a href="#">Changelog</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__links-group">
+          <h4>Community</h4>
+          <ul>
+            <li><a href="#">Discord</a></li>
+            <li><a href="#">Leaderboards</a></li>
+            <li><a href="#">Country Wars</a></li>
+            <li><a href="#">Fan of the Week</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__links-group">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#" id="termsLink">Terms of Service</a></li>
+            <li><a href="#" id="privacyLink">Privacy Policy</a></li>
+            <li><a href="#">Community Guidelines</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">DMCA</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__legal-note">
+          FanZone is a fan engagement platform. No real money, no gambling, no cash rewards. All XP, badges and ranks are purely for fun and community status. FanZone is not affiliated with FIFA. For users 13+. By using FanZone you agree to our Terms of Service and Community Guidelines.
+        </p>
+        <p class="footer__copy">© 2026 FanZone. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════
+       LEGAL MODALS
+  ═══════════════════════════════════ -->
+  <div class="modal" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__box">
+      <button class="modal__close" data-close-modal aria-label="Close">✕</button>
+      <h2 id="termsTitle">Terms of Service</h2>
+      <div class="modal__body">
+        <p><strong>Effective Date:</strong> June 1, 2026</p>
+        <h3>1. Acceptance</h3>
+        <p>By downloading or using FanZone, you agree to be bound by these Terms of Service. If you do not agree, do not use the platform.</p>
+        <h3>2. Age Requirement</h3>
+        <p>You must be at least 13 years old to use FanZone. Users under 18 must have parental consent.</p>
+        <h3>3. No Gambling</h3>
+        <p>FanZone is not a gambling platform. All XP, ranks, badges, and virtual rewards have no monetary value and cannot be exchanged for cash or real-world prizes. Predictions are purely for entertainment and fan engagement.</p>
+        <h3>4. User-Generated Content</h3>
+        <p>You retain ownership of content you post but grant FanZone a worldwide, non-exclusive license to use, display and distribute your content on the platform. You are solely responsible for your content.</p>
+        <h3>5. Prohibited Conduct</h3>
+        <p>You may not: post hate speech, harassment, or threats; impersonate others; spam; post illegal content; attempt to hack or disrupt the service; or violate any applicable laws.</p>
+        <h3>6. Account Termination</h3>
+        <p>FanZone may suspend or terminate accounts that violate these Terms at any time, with or without notice.</p>
+        <h3>7. Moderation Rights</h3>
+        <p>FanZone reserves the right to remove any content, suspend any user, and make moderation decisions at its sole discretion.</p>
+        <h3>8. Disclaimer</h3>
+        <p>FanZone is provided "as is" without warranties. We are not responsible for user-generated content or third-party services.</p>
+        <h3>9. Limitation of Liability</h3>
+        <p>FanZone's liability is limited to the maximum extent permitted by applicable law. We are not liable for indirect, incidental, or consequential damages.</p>
+        <h3>10. Governing Law</h3>
+        <p>These Terms are governed by the laws of the jurisdiction in which FanZone operates.</p>
+        <h3>11. FIFA Disclaimer</h3>
+        <p>FanZone is not affiliated with, sponsored by, or endorsed by FIFA or any national football association.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__box">
+      <button class="modal__close" data-close-modal aria-label="Close">✕</button>
+      <h2 id="privacyTitle">Privacy Policy</h2>
+      <div class="modal__body">
+        <p><strong>Effective Date:</strong> June 1, 2026</p>
+        <h3>1. Data We Collect</h3>
+        <p>We collect: account information (username, email, country); usage data (interactions, predictions, game scores); device data (device type, OS, app version); and optional data (profile photo, social connections).</p>
+        <h3>2. How We Use Your Data</h3>
+        <p>To provide and improve the platform; personalize your feed; display leaderboards; send notifications; detect abuse; comply with legal obligations.</p>
+        <h3>3. Data Sharing</h3>
+        <p>We do not sell your personal data. We may share data with: service providers who help operate the platform; law enforcement when required by law; third parties only with your consent.</p>
+        <h3>4. GDPR Rights (EU Users)</h3>
+        <p>You have the right to access, rectify, erase, restrict, and port your personal data. To exercise these rights, contact privacy@fanzone.app.</p>
+        <h3>5. CCPA Rights (California Users)</h3>
+        <p>California residents have the right to know what personal data we collect, delete personal data, and opt out of any sale (we do not sell data).</p>
+        <h3>6. Cookies</h3>
+        <p>We use essential cookies for functionality and analytics cookies to improve the service. You can manage cookie preferences in your account settings.</p>
+        <h3>7. Data Retention</h3>
+        <p>We retain account data while your account is active. Deleted accounts are purged within 30 days, except where retention is required by law.</p>
+        <h3>8. Children's Privacy</h3>
+        <p>We do not knowingly collect data from children under 13. If you believe a child has provided data, contact us immediately.</p>
+        <h3>9. Security</h3>
+        <p>We use industry-standard encryption, HTTPS, and JWT-based authentication. No security system is perfect; we will notify you of any breaches as required by law.</p>
+        <h3>10. Contact</h3>
+        <p>For privacy inquiries: privacy@fanzone.app</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Goal celebration overlay -->
+  <div class="goal-celebration" id="goalCelebration" aria-hidden="true">
+    <div class="goal-celebration__text">⚽ GOOOAL!</div>
+    <div class="goal-celebration__confetti" id="confettiContainer"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
