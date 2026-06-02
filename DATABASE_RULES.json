@@ -1,0 +1,64 @@
+{
+  "rules": {
+    "live_reactions": {
+      "latest": {
+        ".read": true,
+        ".write": "auth != null",
+        "$key": {
+          ".validate": "newData.hasChildren(['u','e','t','ts']) && newData.child('u').isString() && newData.child('e').isString() && newData.child('t').isString() && newData.child('ts').isNumber()",
+          ".indexOn": ["ts"]
+        }
+      }
+    },
+    "live_match": {
+      ".read": true,
+      ".write": false
+    },
+    "mp_games": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$gameId": {
+        ".validate": "newData.hasChildren(['status','players','roomCode'])",
+        "status": { ".validate": "newData.isString() && newData.val() in ['waiting','active','finished']" },
+        "roomCode": { ".validate": "newData.isString() || newData.val() == null" },
+        "players": {
+          ".validate": "newData.hasChildren(['host','guest'])",
+          "host": {
+            ".validate": "newData.hasChildren(['uid','name'])",
+            "uid": { ".validate": "newData.val() == auth.uid" },
+            "zone": { ".validate": "newData.isNumber() || newData.val() == null" }
+          },
+          "guest": {
+            ".validate": "newData.hasChildren(['uid','name']) || newData.val() == null",
+            "uid": { ".validate": "newData.val() == auth.uid || newData.val() == null" },
+            "zone": { ".validate": "newData.isNumber() || newData.val() == null" }
+          }
+        }
+      }
+    },
+    "user_profiles": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$uid": {
+        ".validate": "$uid == auth.uid",
+        "username": { ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 20" },
+        "country": { ".validate": "newData.isString()" },
+        "reactions": { ".validate": "newData.isNumber()" },
+        "viral": { ".validate": "newData.isNumber()" },
+        "clipViews": { ".validate": "newData.isNumber()" }
+      }
+    },
+    "notifications": {
+      ".read": "auth != null",
+      ".write": false,
+      "$uid": {
+        ".read": "$uid == auth.uid",
+        "$notifId": {
+          ".validate": "newData.hasChildren(['type','ts','data'])"
+        }
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}

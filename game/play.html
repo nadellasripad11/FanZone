@@ -3,57 +3,39 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <meta name="theme-color" content="#0d0d0d"/>
-  <title>FanZone — Play</title>
+  <title>FanZone — React Live</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="app.css"/>
   <style>
-    .mp-penalty { padding:0 16px;margin-bottom:20px; }
-    .mp-players { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
-    .mp-player { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center; }
-    .mp-player.you { border-color:var(--border-green); }
-    .mp-player__role { font-size:.65rem;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:4px; }
-    .mp-player__score { font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green); }
-    .mp-player__name { font-size:.8rem;color:var(--text-2);margin-top:4px; }
+    /* LIVE ROOM */
+    .live-room { padding:0 16px;margin-bottom:20px; }
+    .live-header { background:linear-gradient(160deg,rgba(204,255,0,.06),rgba(255,68,68,.03));border:1px solid var(--border-green);border-radius:var(--radius);padding:14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between; }
+    .live-match-info { flex:1; }
+    .live-match-title { font-family:var(--font-display);font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px; }
+    .live-viewers { font-size:.75rem;color:var(--text-3);display:flex;align-items:center;gap:4px; }
+    .live-dot { width:6px;height:6px;background:var(--red);border-radius:50%;animation:livePulse 1.2s infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 
-    /* Goal zones for both players */
-    .mp-goals { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
-    .mp-goal-section { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px; }
-    .mp-goal-title { font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:10px; }
-    .mp-goal-frame { width:100%;aspect-ratio:3/2;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);border-radius:4px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;padding:6px;margin-bottom:10px; }
-    .mp-zone { border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.2rem; }
-    .mp-zone:hover { background:rgba(204,255,0,.12);border-color:var(--border-green); }
-    .mp-zone.selected { background:rgba(204,255,0,.25);border-color:var(--green);box-shadow:0 0 12px rgba(204,255,0,.3); }
-    .mp-zone.hit { background:rgba(204,255,0,.3);border-color:var(--green); }
-    .mp-zone.saved { background:var(--red-dim);border-color:rgba(255,68,68,.5); }
+    /* REACTION FEED */
+    .reaction-feed { background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius);height:240px;overflow-y:auto;padding:10px;margin-bottom:14px;display:flex;flex-direction:column-reverse; }
+    .reaction-item { display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.75rem;padding:6px;background:rgba(255,255,255,.02);border-radius:4px;animation:slideIn .3s ease; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+    .reaction-user { color:var(--text-3);font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .reaction-emoji { font-size:1rem;line-height:1; }
+    .reaction-count { color:var(--green);font-weight:700;font-size:.7rem;background:var(--green-dim);border-radius:10px;padding:2px 6px; }
 
-    .mp-status { font-size:.75rem;color:var(--text-3);text-align:center;margin-bottom:10px;min-height:20px; }
-    .mp-btn { width:100%;padding:10px;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:.8rem; }
-    .mp-btn:hover { background:#b8e600; }
-    .mp-btn:disabled { background:var(--text-3);cursor:not-allowed;opacity:.5; }
-    .mp-waiting { text-align:center;padding:20px;color:var(--text-3); }
-  </style>
-  <style>
-    /* Mode grid */
-    .mode-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px; }
-    .mode-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden; }
-    .mode-card:hover { border-color:var(--border-green);transform:translateY(-1px); }
-    .mode-card.featured { grid-column:span 2;border-color:var(--border-green);background:linear-gradient(135deg,rgba(204,255,0,.06),var(--bg-2)); }
-    .mode-card__icon { font-size:2rem;line-height:1;margin-bottom:8px; }
-    .mode-card__title { font-family:var(--font-display);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px; }
-    .mode-card__sub { font-size:.72rem;color:var(--text-3);line-height:1.4; }
-    .mode-card__xp { position:absolute;top:10px;right:10px;font-size:.65rem;font-weight:700;color:var(--green);background:var(--green-dim);border:1px solid var(--border-green);border-radius:20px;padding:2px 7px; }
-    .mode-card__badge { position:absolute;top:10px;right:10px;font-size:.62rem;font-weight:700;color:var(--red);background:var(--red-dim);border:1px solid rgba(255,68,68,.3);border-radius:20px;padding:2px 7px; }
+    /* QUICK REACTIONS */
+    .reaction-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
+    .reaction-btn { background:var(--bg-2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:4px; }
+    .reaction-btn:hover { border-color:var(--border-green);transform:scale(1.05); }
+    .reaction-btn.active { border-color:var(--green);background:var(--green-dim);box-shadow:0 0 8px rgba(204,255,0,.3); }
+    .reaction-btn__emoji { font-size:1.8rem;line-height:1; }
+    .reaction-btn__label { font-size:.6rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:600; }
 
-    /* Penalty game */
+    /* PENALTY GAME */
     #penaltyGame { display:none;padding:0 16px;margin-bottom:20px; }
     .penalty-arena { background:linear-gradient(160deg,#0a1a0a,#0d1a0d);border:1px solid var(--border-green);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden; }
-    .penalty-arena::before { content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&q=30') center/cover no-repeat;opacity:.06; }
-    .penalty-arena > * { position:relative; }
-    .goal-header { font-family:var(--font-display);font-size:1.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px; }
-    .goal-sub { font-size:.78rem;color:var(--text-3);margin-bottom:20px; }
-
-    /* Goal frame */
     .goal-frame { width:100%;max-width:300px;margin:0 auto 16px;aspect-ratio:3/2;background:rgba(0,0,0,.4);border:3px solid rgba(255,255,255,.2);border-radius:4px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;padding:6px;position:relative; }
     .goal-zone { border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.4rem; }
     .goal-zone:hover { background:rgba(204,255,0,.12);border-color:var(--border-green); }
@@ -65,331 +47,170 @@
     .score-board { display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px; }
     .score-board__you { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--green);line-height:1; }
     .score-board__keeper { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--red);line-height:1; }
-    .score-board__dash { font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:var(--text-3); }
-    .score-board__label { font-size:.65rem;color:var(--text-3);text-align:center;margin-top:2px; }
-
-    .kick-count { font-size:.8rem;color:var(--text-3);margin-bottom:14px; }
-    .kick-count span { color:var(--text-1);font-weight:700; }
-
     .penalty-result { font-family:var(--font-display);font-size:1.4rem;font-weight:900;min-height:36px;letter-spacing:.04em; }
     .penalty-result.goal { color:var(--green); }
     .penalty-result.saved { color:var(--red); }
 
-    .penalty-instruction { font-size:.8rem;color:var(--text-2);margin:8px 0 4px; }
-
-    /* Streak display */
     .kicks-row { display:flex;gap:6px;justify-content:center;margin:10px 0; }
     .kick-dot { width:28px;height:28px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem; }
     .kick-dot.goal { background:rgba(204,255,0,.2);border-color:var(--border-green); }
     .kick-dot.saved { background:var(--red-dim);border-color:rgba(255,68,68,.4); }
 
-    /* Sign in dialog */
-    .signin-dialog { display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center; }
-    .signin-dialog.show { display:flex; }
-    .signin-dialog__content { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:300px;text-align:center; }
-    .signin-dialog__title { font-family:var(--font-display);font-size:1.3rem;font-weight:900;margin-bottom:12px; }
-    .signin-dialog__text { font-size:.9rem;color:var(--text-2);margin-bottom:20px;line-height:1.5; }
-    .signin-dialog__buttons { display:flex;gap:10px;flex-direction:column; }
+    /* MODE SELECTOR */
+    .mode-selector { padding:0 16px;margin-bottom:20px; }
+    .mode-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+    .mode-card { background:var(--bg-2);border:2px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;text-align:center; }
+    .mode-card:hover { border-color:var(--border-green);transform:translateY(-1px); }
+    .mode-card__icon { font-size:2.5rem;margin-bottom:10px; }
+    .mode-card__title { font-family:var(--font-display);font-size:.95rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px; }
+    .mode-card__sub { font-size:.7rem;color:var(--text-3); }
 
-    /* Multiplayer mode selector */
-    .mp-mode-selector { display:none;padding:0 16px;margin-bottom:20px; }
-    .mp-mode-selector.show { display:block; }
-    .mode-selector-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
-    .mode-btn { background:var(--bg-2);border:2px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;text-align:center; }
-    .mode-btn:hover { border-color:var(--border-green);transform:translateY(-2px); }
-    .mode-btn__icon { font-size:2.5rem;margin-bottom:10px; }
-    .mode-btn__text { font-size:.85rem;font-weight:700;color:var(--text-1); }
-    .mode-btn__sub { font-size:.7rem;color:var(--text-3);margin-top:4px; }
+    /* TAB SYSTEM */
+    .game-tabs { display:flex;gap:0;background:var(--bg-3);border-radius:var(--radius-sm);padding:3px;margin-bottom:16px; }
+    .game-tab { flex:1;text-align:center;padding:8px;font-size:.75rem;font-weight:700;border-radius:7px;cursor:pointer;color:var(--text-3);transition:all .15s;background:none;border:none;letter-spacing:.04em;text-transform:uppercase; }
+    .game-tab.active { background:var(--bg-2);color:var(--text-1);box-shadow:0 1px 4px rgba(0,0,0,.5); }
 
-    /* Custom lobby screen */
-    .mp-custom-lobby { display:none;padding:0 16px;margin-bottom:20px; }
-    .mp-custom-lobby.show { display:block; }
-    .lobby-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px; }
-    .lobby-card__title { font-family:var(--font-display);font-size:1.1rem;font-weight:900;margin-bottom:14px;text-align:center; }
-    .lobby-option { margin-bottom:14px; }
-    .lobby-option:last-child { margin-bottom:0; }
-    .lobby-option__label { font-size:.75rem;text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:8px;display:block; }
-    .room-code { font-family:monospace;font-size:1.4rem;font-weight:900;color:var(--green);text-align:center;letter-spacing:4px;padding:12px;background:rgba(204,255,0,.1);border:1px solid var(--border-green);border-radius:var(--radius-sm);margin-bottom:10px; }
-    .code-input { width:100%;padding:12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-1);font-size:1rem;font-family:monospace;text-transform:uppercase;margin-bottom:10px; }
-    .code-input::placeholder { color:var(--text-3); }
-    .lobby-action-btns { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
-
-    /* Invite popup */
-    .invite-popup { position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:999; }
-    .invite-popup__content { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:320px;text-align:center;animation:slideUp .3s ease; }
-    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    /* GENERAL */
+    .btn { padding:12px;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all .18s;font-size:.85rem;width:100%;background:var(--green);color:#000;text-transform:uppercase;letter-spacing:.04em; }
+    .btn:hover { background:#b8e600;transform:translateY(-1px); }
+    .btn:disabled { background:var(--text-3);cursor:not-allowed;opacity:.5; }
+    .btn--secondary { background:transparent;border:1px solid var(--border);color:var(--text-2); }
+    .btn--secondary:hover { border-color:var(--border-green);color:var(--green); }
+    .close-btn { padding:10px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-3);cursor:pointer;width:100%;transition:all .15s;font-weight:700; }
+    .close-btn:hover { border-color:var(--border-green);color:var(--green); }
   </style>
 </head>
 <body>
 
 <div class="page-top">
-  <div class="page-top__title">🎮 Play</div>
-  <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
+  <div class="page-top__title">⚡ React Live</div>
+  <div class="icon-btn" id="profileBtn" onclick="location.href='profile.html'">😎</div>
 </div>
 
-<!-- TABS -->
-<div style="padding:12px 16px 16px">
-  <div class="tabs">
-    <button class="tab active" onclick="switchPlayTab('modes',this)">Game Modes</button>
-    <button class="tab" onclick="switchPlayTab('daily',this)">Daily Challenge</button>
-    <button class="tab" onclick="switchPlayTab('friends',this)">Friends</button>
-  </div>
-</div>
-
-<!-- GAME MODES TAB -->
-<div id="tab-modes">
-  <div class="section-header" style="padding:0 18px;margin-bottom:12px">
-    <div class="section-title">Choose Your Mode</div>
-  </div>
-  <div class="mode-grid">
-    <div class="mode-card featured" onclick="startMultiplayerPenalty()">
-      <div class="mode-card__xp">+100–500 XP</div>
-      <div class="mode-card__icon">⚡🥅</div>
-      <div class="mode-card__title">Multiplayer Penalty</div>
-      <div class="mode-card__sub">🔴 Live! Face off vs another player. One shoots, one saves!</div>
-    </div>
-    <div class="mode-card" onclick="startPenalty()">
-      <div class="mode-card__xp">+50–500 XP</div>
-      <div class="mode-card__icon">🥅</div>
-      <div class="mode-card__title">Solo Penalty</div>
-      <div class="mode-card__sub">Take 5 penalties vs AI. Score as many as you can!</div>
-    </div>
-    <div class="mode-card" onclick="showComingSoon()">
-      <div class="mode-card__badge">⚡ Live</div>
-      <div class="mode-card__icon">⚡</div>
-      <div class="mode-card__title">Quick Match</div>
-      <div class="mode-card__sub">Fast 5-question trivia vs a random fan</div>
-    </div>
-    <div class="mode-card" onclick="showComingSoon()">
-      <div class="mode-card__xp">+200 XP</div>
-      <div class="mode-card__icon">🤝</div>
-      <div class="mode-card__title">Friend Battle</div>
-      <div class="mode-card__sub">Challenge a friend to a prediction duel</div>
-    </div>
-    <div class="mode-card" onclick="showComingSoon()">
-      <div class="mode-card__xp">+1K XP</div>
-      <div class="mode-card__icon">🏆</div>
-      <div class="mode-card__title">Tournament</div>
-      <div class="mode-card__sub">32-player bracket, represent your country</div>
-    </div>
-    <div class="mode-card" onclick="showComingSoon()">
-      <div class="mode-card__xp">+300 XP</div>
-      <div class="mode-card__icon">💀</div>
-      <div class="mode-card__title">Survival</div>
-      <div class="mode-card__sub">One wrong answer and you're out</div>
-    </div>
+<!-- GAME TABS -->
+<div style="padding:0 16px;margin-bottom:16px">
+  <div class="game-tabs">
+    <button class="game-tab active" onclick="switchTab('live',this)">🔴 Live</button>
+    <button class="game-tab" onclick="switchTab('penalty',this)">🥅 Penalty</button>
   </div>
 </div>
 
-<!-- DAILY CHALLENGE TAB -->
-<div id="tab-daily" style="display:none;padding:0 16px">
-  <div style="background:var(--bg-2);border:1px solid var(--border-green);border-radius:var(--radius);padding:18px;margin-bottom:14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em">Daily Trivia</div>
-      <div class="xp-pill">⚡ +100 XP</div>
+<!-- LIVE ROOM TAB -->
+<div id="tab-live" class="live-room">
+  <div class="live-header">
+    <div class="live-match-info">
+      <div class="live-match-title" id="liveMatchTitle">🇧🇷 Brazil vs 🇦🇷 Argentina</div>
+      <div class="live-viewers"><span class="live-dot"></span>👁️ <span id="liveViewerCount">124K</span> watching</div>
     </div>
-    <div id="quizQ" style="font-size:.95rem;font-weight:600;margin-bottom:16px;line-height:1.5"></div>
-    <div id="quizOpts" style="display:flex;flex-direction:column;gap:8px"></div>
-    <div id="quizResult" style="min-height:20px;margin-top:12px;font-size:.82rem;font-weight:700;text-align:center"></div>
-  </div>
-  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:10px">Today's Streak Bonus</div>
-    <div style="display:flex;gap:8px">
-      ${[1,2,3,4,5,6,7].map((d,i)=>`<div style="flex:1;background:${i<3?'rgba(204,255,0,.15)':'var(--bg-3)'};border:1px solid ${i<3?'var(--border-green)':'var(--border)'};border-radius:6px;padding:8px 4px;text-align:center;font-size:.7rem;color:${i<3?'var(--green)':'var(--text-3)'}"><div>${['M','T','W','T','F','S','S'][i]}</div><div>${i<3?'✓':'·'}</div></div>`).join('')}
+    <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:var(--green);text-align:right">
+      <div id="liveScore">2 — 1</div>
+      <div style="font-size:.7rem;color:var(--text-3);font-family:var(--font-body);margin-top:2px" id="liveTime">78:23</div>
     </div>
-    <div style="font-size:.72rem;color:var(--text-3);margin-top:10px;text-align:center">3-day streak · +30 bonus XP</div>
   </div>
-</div>
 
-<!-- FRIENDS TAB -->
-<div id="tab-friends" style="display:none;padding:0 16px">
-  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;margin-top:4px">
-    <div style="font-size:3rem;margin-bottom:12px">👥</div>
-    <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Invite Friends</div>
-    <div style="font-size:.82rem;color:var(--text-2);line-height:1.6;margin-bottom:16px">Challenge friends to prediction battles. Get +200 XP when a friend joins FanZone!</div>
-    <div id="inviteUrlDisplay" style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:.75rem;color:var(--text-3);word-break:break-all;font-family:monospace;display:none"></div>
-    <button class="btn btn--primary btn--full" onclick="copyInviteLink()">🔗 Copy Invite Link</button>
+  <div style="margin-bottom:14px">
+    <div style="font-size:.75rem;color:var(--text-3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:8px">Live Reactions</div>
+    <div class="reaction-feed" id="reactionFeed"></div>
   </div>
-  <div style="margin-top:14px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Recent Challengers</div>
-    ${[{n:'TheFootballKing',f:'🇧🇷',r:'won 3-1'},{n:'PredictWizard',f:'🇦🇷',r:'lost 2-4'},{n:'TacticsTalk',f:'🇬🇧',r:'tied 3-3'}].map(p=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <div class="avatar avatar--sm">${p.f}</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:.85rem">${p.n}</div><div style="font-size:.7rem;color:var(--text-3)">${p.r}</div></div>
-      <button class="btn btn--ghost" style="padding:8px 14px;font-size:.75rem" onclick="showToast('Challenge sent!')">Rematch</button>
-    </div>`).join('')}
-  </div>
-</div>
 
-<!-- SIGN IN DIALOG -->
-<div id="signinDialog" class="signin-dialog">
-  <div class="signin-dialog__content">
-    <div class="signin-dialog__title">🔐 Sign In Required</div>
-    <div class="signin-dialog__text">You need to be signed in to play multiplayer games.</div>
-    <div class="signin-dialog__buttons">
-      <button class="btn btn--primary" onclick="redirectToSignIn()">✓ Sign In</button>
-      <button class="btn btn--ghost" onclick="closeSigninDialog()">✕ Cancel</button>
+  <div style="margin-bottom:14px">
+    <div style="font-size:.75rem;color:var(--text-3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:8px">Quick React</div>
+    <div class="reaction-grid">
+      <button class="reaction-btn" onclick="postReaction('😍','love')">
+        <span class="reaction-emoji">😍</span>
+        <span class="reaction-btn__label">Love</span>
+      </button>
+      <button class="reaction-btn" onclick="postReaction('😭','sad')">
+        <span class="reaction-emoji">😭</span>
+        <span class="reaction-btn__label">Sad</span>
+      </button>
+      <button class="reaction-btn" onclick="postReaction('🔥','fire')">
+        <span class="reaction-emoji">🔥</span>
+        <span class="reaction-btn__label">Fire</span>
+      </button>
+      <button class="reaction-btn" onclick="postReaction('⚽','goal')">
+        <span class="reaction-emoji">⚽</span>
+        <span class="reaction-btn__label">Goal</span>
+      </button>
+      <button class="reaction-btn" onclick="postReaction('😡','angry')">
+        <span class="reaction-emoji">😡</span>
+        <span class="reaction-btn__label">Angry</span>
+      </button>
+      <button class="reaction-btn" onclick="postReaction('🎉','party')">
+        <span class="reaction-emoji">🎉</span>
+        <span class="reaction-btn__label">Party</span>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+      <div style="font-size:.65rem;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">Your Reactions</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green)" id="userReactionCount">0</div>
+    </div>
+    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+      <div style="font-size:.65rem;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">Trending</div>
+      <div style="font-size:1.6rem" id="trendingEmoji">🔥</div>
     </div>
   </div>
 </div>
 
-<!-- MULTIPLAYER MODE SELECTOR -->
-<div id="mpModeSelector" class="mp-mode-selector">
-  <div style="text-align:center;margin-bottom:20px">
-    <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:8px">⚡🥅 Multiplayer Penalty</div>
-    <div style="font-size:.85rem;color:var(--text-3)">How do you want to play?</div>
-  </div>
-  <div class="mode-selector-grid">
-    <div class="mode-btn" onclick="startRandomMatch()">
-      <div class="mode-btn__icon">🎲</div>
-      <div class="mode-btn__text">Random Player</div>
-      <div class="mode-btn__sub">Auto-match</div>
+<!-- PENALTY TAB -->
+<div id="tab-penalty" style="display:none">
+  <!-- Mode Selector -->
+  <div id="penaltyModeSelector" class="mode-selector">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:6px">⚽ Penalty Shootout</div>
+      <div style="font-size:.85rem;color:var(--text-3)">Test your skills</div>
     </div>
-    <div class="mode-btn" onclick="showCustomLobby()">
-      <div class="mode-btn__icon">🔗</div>
-      <div class="mode-btn__text">Custom Lobby</div>
-      <div class="mode-btn__sub">Room codes</div>
-    </div>
-  </div>
-  <button class="btn btn--ghost btn--full" style="margin-top:14px" onclick="closeMultiplayerMode()">✕ Back</button>
-</div>
-
-<!-- CUSTOM LOBBY SCREEN -->
-<div id="mpCustomLobby" class="mp-custom-lobby">
-  <div class="lobby-card">
-    <div class="lobby-card__title">🔗 Custom Lobby</div>
-
-    <!-- Create Room -->
-    <div class="lobby-option">
-      <label class="lobby-option__label">📝 Create a Room</label>
-      <button class="btn btn--primary btn--full" onclick="createMpRoom()">Create Room & Get Code</button>
-    </div>
-
-    <!-- Room Code Display (hidden until created) -->
-    <div id="mpRoomCodeDisplay" style="display:none;margin-bottom:14px">
-      <label class="lobby-option__label">✓ Your Room Code</label>
-      <div class="room-code" id="mpRoomCode">LOADING</div>
-      <div style="font-size:.75rem;color:var(--text-3);text-align:center;margin-bottom:10px">Share this code with your friend</div>
-      <button class="btn btn--secondary btn--full" onclick="copyRoomCode()" style="background:var(--bg-3);border:1px solid var(--border)" id="copyBtn">📋 Copy Code</button>
-      <div style="font-size:.7rem;color:var(--text-3);text-align:center;margin-top:8px" id="mpWaitingText">⏳ Waiting for opponent to join...</div>
-    </div>
-
-    <!-- Divider -->
-    <div style="border-top:1px solid var(--border);margin:16px 0"></div>
-
-    <!-- Join Room -->
-    <div class="lobby-option">
-      <label class="lobby-option__label">🔓 Join a Room</label>
-      <input type="text" class="code-input" id="joinCodeInput" placeholder="Enter room code" maxlength="6">
-      <button class="btn btn--primary btn--full" onclick="joinMpRoom()">Join Room</button>
-    </div>
-  </div>
-
-  <button class="btn btn--ghost btn--full" onclick="backToModeSelector()">✕ Back</button>
-</div>
-
-<!-- MULTIPLAYER PENALTY GAME -->
-<div id="mpPenaltyGame" style="display:none">
-  <div class="mp-penalty">
-    <div style="text-align:center;margin-bottom:20px">
-      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:900;margin-bottom:8px">🥅 Multiplayer Penalty</div>
-      <div style="font-size:.85rem;color:var(--text-3)">Live face-off with another player</div>
-    </div>
-
-    <!-- Player Cards & Scores -->
-    <div class="mp-players">
-      <div class="mp-player you">
-        <div class="mp-player__role">You (Penalty Taker)</div>
-        <div class="mp-player__score" id="mpYouScore">0</div>
-        <div class="mp-player__name" id="mpYouName">Loading...</div>
+    <div class="mode-grid">
+      <div class="mode-card" onclick="startSoloPenalty()">
+        <div class="mode-card__icon">🤖</div>
+        <div class="mode-card__title">vs AI</div>
+        <div class="mode-card__sub">Beat the keeper</div>
       </div>
-      <div class="mp-player">
-        <div class="mp-player__role">Opponent (Goalkeeper)</div>
-        <div class="mp-player__score" id="mpOppScore">0</div>
-        <div class="mp-player__name" id="mpOppName">Waiting...</div>
+      <div class="mode-card" onclick="startMultiplayerPenalty()">
+        <div class="mode-card__icon">⚡</div>
+        <div class="mode-card__title">vs Friend</div>
+        <div class="mode-card__sub">Real opponent</div>
       </div>
     </div>
+  </div>
 
-    <!-- Goal Zones (Both Players) -->
-    <div class="mp-goals">
-      <!-- Penalty Taker's Choice -->
-      <div class="mp-goal-section">
-        <div class="mp-goal-title">Where to Shoot?</div>
-        <div class="mp-goal-frame" id="mpTakerFrame">
-          <div class="mp-zone" onclick="mpSelectZone(0,true)">↖</div>
-          <div class="mp-zone" onclick="mpSelectZone(1,true)">↑</div>
-          <div class="mp-zone" onclick="mpSelectZone(2,true)">↗</div>
-          <div class="mp-zone" onclick="mpSelectZone(3,true)">↙</div>
-          <div class="mp-zone" onclick="mpSelectZone(4,true)">↓</div>
-          <div class="mp-zone" onclick="mpSelectZone(5,true)">↘</div>
+  <!-- Solo Penalty Game -->
+  <div id="penaltyGame">
+    <div class="penalty-arena">
+      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:900;margin-bottom:6px">⚽ Penalty Shootout</div>
+      <div style="font-size:.85rem;color:var(--text-3);margin-bottom:14px">Score 5 penalties vs the AI (35% save rate)</div>
+
+      <div class="score-board">
+        <div>
+          <div class="score-board__you" id="penYou">0</div>
+          <div style="font-size:.65rem;color:var(--text-3);margin-top:4px">You</div>
         </div>
-        <div class="mp-status" id="mpTakerStatus">Choose where to shoot</div>
-        <button class="mp-btn" id="mpTakerBtn" onclick="mpShoot()" disabled>🎯 Shoot</button>
-      </div>
-
-      <!-- Goalkeeper's Choice -->
-      <div class="mp-goal-section">
-        <div class="mp-goal-title">Where to Dive?</div>
-        <div class="mp-goal-frame" id="mpKeeperFrame">
-          <div class="mp-zone" onclick="mpSelectZone(0,false)">↖</div>
-          <div class="mp-zone" onclick="mpSelectZone(1,false)">↑</div>
-          <div class="mp-zone" onclick="mpSelectZone(2,false)">↗</div>
-          <div class="mp-zone" onclick="mpSelectZone(3,false)">↙</div>
-          <div class="mp-zone" onclick="mpSelectZone(4,false)">↓</div>
-          <div class="mp-zone" onclick="mpSelectZone(5,false)">↘</div>
+        <div style="font-family:var(--font-display);font-size:1.6rem;color:var(--text-3)">—</div>
+        <div>
+          <div class="score-board__keeper" id="penKeeper">0</div>
+          <div style="font-size:.65rem;color:var(--text-3);margin-top:4px">AI</div>
         </div>
-        <div class="mp-status" id="mpKeeperStatus">Choose where to dive</div>
-        <button class="mp-btn" id="mpKeeperBtn" onclick="mpDive()" disabled>🧤 Dive</button>
       </div>
-    </div>
 
-    <!-- Kick Progress -->
-    <div style="padding:0 16px;margin-bottom:14px;text-align:center">
-      <div style="font-size:.85rem;color:var(--text-3);margin-bottom:10px">Kick <span id="mpKickNum">1</span> of 5</div>
-      <div class="kicks-row" id="mpKickDots"></div>
-      <div class="penalty-result" id="mpResult" style="margin-top:10px;min-height:30px"></div>
-    </div>
+      <div style="font-size:.8rem;color:var(--text-3);margin-bottom:12px">Kick <span id="kickNum">1</span> of 5</div>
+      <div class="kicks-row" id="kickDots"></div>
+      <div class="penalty-result" id="penResult"></div>
 
-    <div style="padding:0 16px">
-      <button class="btn btn--ghost btn--full" id="mpClose" onclick="closeMpPenalty()" style="display:none;margin-bottom:10px">✕ Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- PENALTY GAME OVERLAY -->
-<div id="penaltyGame">
-  <div class="penalty-arena">
-    <div class="goal-header" id="penTitle">Penalty Shootout</div>
-    <div class="goal-sub" id="penSub">Pick your spot — score 5 penalties!</div>
-
-    <div class="score-board">
-      <div>
-        <div class="score-board__you" id="penYou">0</div>
-        <div class="score-board__label">You</div>
+      <div class="goal-frame" id="goalFrame">
+        <div class="goal-zone" onclick="shoot(0)"></div>
+        <div class="goal-zone" onclick="shoot(1)"></div>
+        <div class="goal-zone" onclick="shoot(2)"></div>
+        <div class="goal-zone" onclick="shoot(3)"></div>
+        <div class="goal-zone" onclick="shoot(4)"></div>
+        <div class="goal-zone" onclick="shoot(5)"></div>
       </div>
-      <div class="score-board__dash">—</div>
-      <div>
-        <div class="score-board__keeper" id="penKeeper">0</div>
-        <div class="score-board__label">Keeper</div>
-      </div>
+
+      <button class="btn" id="penClose" onclick="closePenalty()" style="display:none;margin-top:10px">✕ Close</button>
+      <button class="btn" id="penRestart" onclick="restartPenalty()" style="display:none;margin-top:10px">🔄 Play Again</button>
     </div>
-
-    <div class="kick-count">Kick <span id="kickNum">1</span> of 5</div>
-    <div class="kicks-row" id="kickDots"></div>
-    <div class="penalty-result" id="penResult"></div>
-    <div class="penalty-instruction" id="penInstruction">👆 Tap a zone to shoot</div>
-
-    <div class="goal-frame" id="goalFrame">
-      <div class="goal-zone" onclick="shoot(0)"></div>
-      <div class="goal-zone" onclick="shoot(1)"></div>
-      <div class="goal-zone" onclick="shoot(2)"></div>
-      <div class="goal-zone" onclick="shoot(3)"></div>
-      <div class="goal-zone" onclick="shoot(4)"></div>
-      <div class="goal-zone" onclick="shoot(5)"></div>
-    </div>
-
-    <button class="btn btn--ghost btn--full" id="penClose" onclick="closePenalty()" style="margin-top:10px;display:none">✕ Close</button>
-    <button class="btn btn--primary btn--full" id="penRestart" onclick="restartPenalty()" style="margin-top:10px;display:none">🔄 Play Again</button>
   </div>
 </div>
 
@@ -406,690 +227,206 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getDatabase, ref, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { getDatabase, ref, onValue, push, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
-window.mpDb = getDatabase(app);
-window.mpDbRef = ref;
-window.mpDbOnValue = onValue;
-window.mpDbSet = set;
-window.mpDbUpdate = update;
-window.mpDbRemove = remove;
+const db = getDatabase(app);
 
+window.authUser = null;
 onAuthStateChanged(auth, u => {
+  window.authUser = u;
   FZ.user = u;
-  const stats = FZ.getStats();
-  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(stats.xp) + ' XP';
+  if (u?.photoURL) {
+    const btn = document.getElementById('profileBtn');
+    btn.innerHTML = `<img src="${u.photoURL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover">`;
+  }
+  initLiveReactionFeed();
 });
-</script>
-<script>
-// ── PENALTY GAME ──
-let penState = { goals:0, saves:0, kick:0, done:false, history:[] };
-const TOTAL_KICKS = 5;
-const SAVE_CHANCE = 0.35;
-const SAVE_MSGS = ['🧤 Saved!','Keeper dives right!','What a save!','Blocked!','No way!'];
-const GOAL_MSGS = ['⚽ GOAL!','Top bins!','Net buster!','GOLAZO!','What a strike!'];
-const ZONES = ['↖','↑','↗','↙','↓','↘'];
 
-function startPenalty() {
-  restartPenalty();
+// Live Reaction Feed
+const maxReactions = 100;
+let liveReactions = [];
+
+function initLiveReactionFeed() {
+  const reactionsRef = ref(db, 'live_reactions/latest');
+  onValue(reactionsRef, snap => {
+    const data = snap.val() || {};
+    liveReactions = Object.values(data).sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, maxReactions);
+    renderReactionFeed();
+  });
+
+  // Live match data
+  const matchRef = ref(db, 'live_match');
+  onValue(matchRef, snap => {
+    const m = snap.val();
+    if (m) {
+      document.getElementById('liveMatchTitle').textContent = `${m.home} vs ${m.away}`;
+      document.getElementById('liveScore').textContent = `${m.score_home} — ${m.score_away}`;
+      document.getElementById('liveTime').textContent = m.minute ? m.minute + "'" : '—';
+    }
+  });
+
+  // Viewer count
+  setInterval(() => {
+    const n = 124000 + Math.floor((Math.random()-0.5)*5000);
+    document.getElementById('liveViewerCount').textContent = (n/1000).toFixed(0)+'K';
+  }, 3000);
+}
+
+window.postReaction = async function(emoji, type) {
+  if (!window.authUser) { showToast('Sign in to post reactions'); return; }
+  const profile = FZ.getProfile();
+  const username = profile?.username || 'Fan';
+
+  const reaction = {
+    u: username,
+    e: emoji,
+    t: type,
+    ts: Date.now()
+  };
+
+  try {
+    const reactionsRef = ref(db, 'live_reactions/latest');
+    await push(reactionsRef, reaction);
+
+    // Update user's reaction count
+    const userStats = FZ.getStats();
+    userStats.reactions = (userStats.reactions || 0) + 1;
+    FZ.saveStats(userStats);
+    document.getElementById('userReactionCount').textContent = userStats.reactions;
+
+    showToast(emoji + ' Reaction posted!');
+  } catch(e) {
+    console.error('Reaction post failed:', e);
+    showToast('⚠️ Failed to post reaction');
+  }
+};
+
+function renderReactionFeed() {
+  const feedEl = document.getElementById('reactionFeed');
+  feedEl.innerHTML = liveReactions.map(r => `
+    <div class="reaction-item">
+      <span class="reaction-emoji">${r.e}</span>
+      <span class="reaction-user">${r.u}</span>
+      <span class="reaction-count">${Math.floor(Math.random()*500)+10}</span>
+    </div>
+  `).join('');
+
+  // Trending emoji
+  const emojiCounts = {};
+  liveReactions.forEach(r => {
+    emojiCounts[r.e] = (emojiCounts[r.e] || 0) + 1;
+  });
+  const trending = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1])[0];
+  if (trending) {
+    document.getElementById('trendingEmoji').textContent = trending[0];
+  }
+}
+
+// Penalty Game
+window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, currentZone: null };
+
+window.startSoloPenalty = function() {
+  document.getElementById('penaltyModeSelector').style.display = 'none';
   document.getElementById('penaltyGame').style.display = 'block';
-  document.getElementById('tab-modes').style.display = 'none';
-  document.getElementById('penaltyGame').scrollIntoView({behavior:'smooth'});
+  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0 };
+  renderPenaltyUI();
+};
+
+window.shoot = function(zone) {
+  window.penaltyState.currentZone = zone;
+  highlightZone(zone);
+
+  setTimeout(() => {
+    const aiZone = Math.floor(Math.random() * 6);
+    const isGoal = zone !== aiZone;
+
+    if (isGoal) {
+      window.penaltyState.playerScore++;
+      document.getElementById('penResult').textContent = '⚽ GOAL!';
+      document.getElementById('penResult').className = 'penalty-result goal';
+      document.getElementById(goalFrame).children[zone].classList.add('hit');
+    } else {
+      document.getElementById('penResult').textContent = '🧤 SAVED!';
+      document.getElementById('penResult').className = 'penalty-result saved';
+      document.getElementById('goalFrame').children[zone].classList.add('saved');
+      document.getElementById('goalFrame').children[aiZone].classList.add('saved');
+    }
+
+    window.penaltyState.kicks++;
+    document.getElementById('penYou').textContent = window.penaltyState.playerScore;
+
+    if (window.penaltyState.kicks >= 5) {
+      setTimeout(endPenalty, 1000);
+    } else {
+      setTimeout(resetPenalty, 1500);
+    }
+  }, 300);
+};
+
+function highlightZone(zone) {
+  document.querySelectorAll('.goal-zone').forEach((z, i) => {
+    if (i === zone) z.style.background = 'rgba(204,255,0,.3)';
+    else z.style.pointerEvents = 'none';
+  });
 }
 
-function closePenalty() {
-  document.getElementById('penaltyGame').style.display = 'none';
-  document.getElementById('tab-modes').style.display = 'block';
-  penState = { goals:0, saves:0, kick:0, done:false, history:[] };
-}
-
-function restartPenalty() {
-  penState = { goals:0, saves:0, kick:0, done:false, history:[] };
+function renderPenaltyUI() {
   document.getElementById('penYou').textContent = '0';
   document.getElementById('penKeeper').textContent = '0';
   document.getElementById('kickNum').textContent = '1';
   document.getElementById('penResult').textContent = '';
-  document.getElementById('penResult').className = 'penalty-result';
-  document.getElementById('penInstruction').textContent = '👆 Tap a zone to shoot';
-  document.getElementById('penClose').style.display = 'none';
-  document.getElementById('penRestart').style.display = 'none';
-  document.getElementById('penTitle').textContent = 'Penalty Shootout';
-  document.getElementById('penSub').textContent = 'Pick your spot — score 5 penalties!';
-  renderKickDots();
-  enableZones(true);
+  document.getElementById('goalFrame').innerHTML = Array(6).fill().map((_, i) =>
+    `<div class="goal-zone" onclick="shoot(${i})"></div>`
+  ).join('');
 }
 
-function renderKickDots() {
-  const dots = document.getElementById('kickDots');
-  dots.innerHTML = Array.from({length:TOTAL_KICKS},(_, i)=>{
-    const h = penState.history[i];
-    return `<div class="kick-dot ${h==='goal'?'goal':h==='saved'?'saved':''}">${h==='goal'?'⚽':h==='saved'?'🧤':i===penState.kick&&!penState.done?'👟':''}</div>`;
-  }).join('');
+function resetPenalty() {
+  document.getElementById('kickNum').textContent = (window.penaltyState.kicks + 1);
+  document.getElementById('penResult').textContent = '';
+  document.getElementById('goalFrame').innerHTML = Array(6).fill().map((_, i) =>
+    `<div class="goal-zone" onclick="shoot(${i})"></div>`
+  ).join('');
 }
 
-function enableZones(on) {
-  document.querySelectorAll('.goal-zone').forEach(z=>{
-    z.style.pointerEvents = on ? 'auto' : 'none';
-    z.innerHTML = on ? ZONES[Array.from(document.querySelectorAll('.goal-zone')).indexOf(z)] : '';
-  });
-}
-
-function shoot(zone) {
-  if (penState.done || penState.kick >= TOTAL_KICKS) return;
-  enableZones(false);
-
-  const zones = document.querySelectorAll('.goal-zone');
-  const saved = Math.random() < SAVE_CHANCE;
-  const resultEl = document.getElementById('penResult');
-  const zoneEl = zones[zone];
-
-  if (saved) {
-    penState.saves++;
-    penState.history.push('saved');
-    zoneEl.classList.add('saved');
-    zoneEl.textContent = '🧤';
-    resultEl.textContent = SAVE_MSGS[Math.floor(Math.random()*SAVE_MSGS.length)];
-    resultEl.className = 'penalty-result saved';
-    document.getElementById('penKeeper').textContent = penState.saves;
-  } else {
-    penState.goals++;
-    penState.history.push('goal');
-    zoneEl.classList.add('hit');
-    zoneEl.textContent = '⚽';
-    resultEl.textContent = GOAL_MSGS[Math.floor(Math.random()*GOAL_MSGS.length)];
-    resultEl.className = 'penalty-result goal';
-    document.getElementById('penYou').textContent = penState.goals;
-  }
-
-  penState.kick++;
-  renderKickDots();
-
-  setTimeout(()=>{
-    zoneEl.classList.remove('hit','saved');
-    if (penState.kick >= TOTAL_KICKS) {
-      endPenalty();
-    } else {
-      document.getElementById('kickNum').textContent = penState.kick + 1;
-      document.getElementById('penInstruction').textContent = '👆 Tap a zone to shoot';
-      enableZones(true);
-      resultEl.textContent = '';
-      resultEl.className = 'penalty-result';
-    }
-  }, 1000);
-}
-
-function endPenalty() {
-  penState.done = true;
-  const g = penState.goals;
-  const xp = g * 100;
-  const msgs = ['Better luck next time!','Not bad, keep practicing!','Decent effort!','Great shooting!','Incredible — Perfect score! 🏆'];
-  document.getElementById('penTitle').textContent = g >= 4 ? '🏆 Outstanding!' : g >= 3 ? '⚽ Well Done!' : '💪 Keep Practicing!';
-  document.getElementById('penSub').textContent = `${g}/5 goals · ${msgs[g]}`;
-  document.getElementById('penInstruction').textContent = '';
+window.endPenalty = function() {
   document.getElementById('penClose').style.display = 'block';
   document.getElementById('penRestart').style.display = 'block';
-  if (xp > 0) {
-    FZ.addXP(xp);
-    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
-    setTimeout(()=>showToast('⚽ ' + g + '/5 goals · +' + xp + ' XP!'), 400);
-  } else {
-    showToast('0/5 goals — try again!');
+  document.querySelectorAll('.goal-zone').forEach(z => z.style.pointerEvents = 'none');
+
+  if (window.authUser) {
+    const stats = FZ.getStats();
+    stats.xp = (stats.xp || 0) + (window.penaltyState.playerScore * 100);
+    FZ.saveStats(stats);
+    showToast('⚡ +' + (window.penaltyState.playerScore * 100) + ' XP');
   }
-  renderKickDots();
-}
+};
 
-// ── MULTIPLAYER PENALTY GAME (Firebase Realtime) ──
-let mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[], roomCode:null };
-let mpUnsubscribe = null;
-let mpCheckInterval = null;
-
-// ── SIGN IN DIALOG ──
-function startMultiplayerPenalty() {
-  if (!FZ.user) {
-    document.getElementById('signinDialog').classList.add('show');
-    return;
-  }
-  showMpModeSelector();
-}
-
-function showSigninDialog() {
-  document.getElementById('signinDialog').classList.add('show');
-}
-
-function closeSigninDialog() {
-  document.getElementById('signinDialog').classList.remove('show');
-}
-
-function redirectToSignIn() {
-  window.location.href = 'index.html#auth';
-}
-
-// ── MULTIPLAYER MODE SELECTOR ──
-function showMpModeSelector() {
-  document.getElementById('tab-modes').style.display = 'none';
-  document.getElementById('mpModeSelector').classList.add('show');
-  document.getElementById('mpCustomLobby').classList.remove('show');
-}
-
-function closeMultiplayerMode() {
-  document.getElementById('mpModeSelector').classList.remove('show');
-  document.getElementById('mpCustomLobby').classList.remove('show');
-  document.getElementById('tab-modes').style.display = 'block';
-}
-
-// ── RANDOM MATCH ──
-function startRandomMatch() {
-  if (!FZ.user) return;
-  if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
-
-  showToast('🔄 Finding opponent...');
-
-  const gameId = 'mp_' + Math.random().toString(36).substr(2,9);
-  const uid = FZ.user.uid;
-  const name = FZ.user.displayName || 'Player';
-
-  mpState = { gameId, uid, role: null, myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [], roomCode: null };
-
-  // Try to find an open game room
-  const gamesRef = window.mpDbRef(window.mpDb, 'mp_games');
-  window.mpDbOnValue(gamesRef, snapshot => {
-    const games = snapshot.val() || {};
-    let foundRoom = null;
-
-    for (let gid in games) {
-      if (games[gid].status === 'waiting' && games[gid].players.host.uid !== uid && !games[gid].roomCode) {
-        foundRoom = gid;
-        break;
-      }
-    }
-
-    if (foundRoom) {
-      // Join existing game
-      mpState.gameId = foundRoom;
-      mpState.role = 'keeper';
-      joinMpGameAuto(foundRoom, uid, name);
-    } else {
-      // Create new game room
-      mpState.role = 'taker';
-      const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
-      window.mpDbSet(gameRef, {
-        gameId,
-        roomCode: null,
-        status: 'waiting',
-        createdAt: Date.now(),
-        players: {
-          host: { uid, name, role: 'taker', zone: null, score: 0 },
-          guest: null
-        },
-        kicks: 0,
-        history: []
-      });
-
-      showToast('⏳ Waiting for opponent...');
-      window.mpDbOnValue(gameRef, snapshot => {
-        const game = snapshot.val();
-        if (game && game.players.guest) {
-          document.getElementById('mpOppName').textContent = game.players.guest.name + ' (Goalkeeper)';
-          showToast('✅ Opponent joined!');
-          renderMpGame();
-          document.getElementById('mpModeSelector').classList.remove('show');
-          document.getElementById('mpCustomLobby').classList.remove('show');
-          document.getElementById('mpPenaltyGame').style.display = 'block';
-          listenToMpGame(gameId);
-        }
-      });
-    }
-  }, { onlyOnce: true });
-}
-
-// ── CUSTOM LOBBY (ROOM CODES) ──
-function showCustomLobby() {
-  document.getElementById('mpModeSelector').classList.remove('show');
-  document.getElementById('mpCustomLobby').classList.add('show');
-}
-
-function backToModeSelector() {
-  document.getElementById('mpCustomLobby').classList.remove('show');
-  document.getElementById('mpModeSelector').classList.add('show');
-  // Clear code display
-  document.getElementById('mpRoomCodeDisplay').style.display = 'none';
-  document.getElementById('mpRoomCode').textContent = 'LOADING';
-}
-
-function generateRoomCode() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
-
-function createMpRoom() {
-  if (!FZ.user) return;
-  if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
-
-  const roomCode = generateRoomCode();
-  const gameId = 'mp_' + roomCode.toLowerCase() + '_' + Date.now();
-  const uid = FZ.user.uid;
-  const name = FZ.user.displayName || 'Player';
-
-  mpState = { gameId, uid, role: 'taker', myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [], roomCode };
-
-  const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
-  window.mpDbSet(gameRef, {
-    gameId,
-    roomCode,
-    status: 'waiting',
-    createdAt: Date.now(),
-    players: {
-      host: { uid, name, role: 'taker', zone: null, score: 0 },
-      guest: null
-    },
-    kicks: 0,
-    history: []
-  });
-
-  // Display code
-  document.getElementById('mpRoomCode').textContent = roomCode;
-  document.getElementById('mpRoomCodeDisplay').style.display = 'block';
-
-  // Wait for opponent
-  window.mpDbOnValue(gameRef, snapshot => {
-    const game = snapshot.val();
-    if (game && game.players.guest) {
-      document.getElementById('mpOppName').textContent = game.players.guest.name + ' (Goalkeeper)';
-      showToast('✅ Opponent joined!');
-      renderMpGame();
-      document.getElementById('mpModeSelector').classList.remove('show');
-      document.getElementById('mpCustomLobby').classList.remove('show');
-      document.getElementById('mpPenaltyGame').style.display = 'block';
-      listenToMpGame(gameId);
-    }
-  });
-}
-
-function copyRoomCode() {
-  const code = document.getElementById('mpRoomCode').textContent;
-  navigator.clipboard.writeText(code);
-  showToast('✓ Code copied!');
-  const btn = document.getElementById('copyBtn');
-  btn.textContent = '✓ Copied!';
-  setTimeout(() => { btn.textContent = '📋 Copy Code'; }, 2000);
-}
-
-function joinMpRoom() {
-  const code = document.getElementById('joinCodeInput').value.toUpperCase().trim();
-  if (!code || code.length !== 6) { showToast('⚠️ Enter a valid 6-character code'); return; }
-
-  if (!FZ.user) return;
-  if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
-
-  // Find room by code
-  const gamesRef = window.mpDbRef(window.mpDb, 'mp_games');
-  window.mpDbOnValue(gamesRef, snapshot => {
-    const games = snapshot.val() || {};
-    let foundGameId = null;
-
-    for (let gid in games) {
-      if (games[gid].roomCode === code && games[gid].status === 'waiting') {
-        foundGameId = gid;
-        break;
-      }
-    }
-
-    if (!foundGameId) {
-      showToast('⚠️ Room not found or game already started');
-      return;
-    }
-
-    // Join the room
-    const uid = FZ.user.uid;
-    const name = FZ.user.displayName || 'Player';
-
-    mpState = { gameId: foundGameId, uid, role: 'keeper', myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [], roomCode: code };
-
-    const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + foundGameId);
-    window.mpDbUpdate(gameRef, {
-      status: 'active',
-      'players/guest': { uid, name, role: 'keeper', zone: null, score: 0 }
-    });
-
-    renderMpGame();
-    document.getElementById('mpModeSelector').classList.remove('show');
-    document.getElementById('mpCustomLobby').classList.remove('show');
-    document.getElementById('mpPenaltyGame').style.display = 'block';
-    showToast('✅ Joined room!');
-    listenToMpGame(foundGameId);
-  }, { onlyOnce: true });
-}
-
-function joinMpGameAuto(gameId, uid, name) {
-  const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
-  window.mpDbUpdate(gameRef, {
-    status: 'active',
-    'players/guest': { uid, name, role: 'keeper', zone: null, score: 0 }
-  });
-
-  renderMpGame();
-  document.getElementById('mpPenaltyGame').style.display = 'block';
-  document.getElementById('mpModeSelector').classList.remove('show');
-  document.getElementById('mpOppName').textContent = 'Waiting...';
-  listenToMpGame(gameId);
-}
-
-function listenToMpGame(gameId) {
-  const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
-
-  if (mpUnsubscribe) mpUnsubscribe();
-
-  mpUnsubscribe = window.mpDbOnValue(gameRef, snapshot => {
-    const game = snapshot.val();
-    if (!game) return;
-
-    const isHost = game.players.host.uid === FZ.user.uid;
-    const me = isHost ? game.players.host : game.players.guest;
-    const opp = isHost ? game.players.guest : game.players.host;
-
-    if (!me || !opp) return;
-
-    // Show opponent name
-    document.getElementById('mpOppName').textContent = (opp.name || 'Opponent') + (mpState.role === 'taker' ? ' 🧤' : ' 🎯');
-
-    mpState.myScore = me.score || 0;
-    mpState.oppScore = opp.score || 0;
-    mpState.kick = game.kicks || 0;
-    mpState.history = game.history || [];
-
-    document.getElementById('mpYouScore').textContent = mpState.myScore;
-    document.getElementById('mpOppScore').textContent = mpState.oppScore;
-    document.getElementById('mpKickNum').textContent = mpState.kick + 1;
-
-    // Check if both players have selected zones
-    if (me.zone !== null && opp.zone !== null && game.status === 'active') {
-      mpState.oppZone = opp.zone;
-      showMpRoundResult();
-    }
-
-    if (game.status === 'finished') {
-      endMpGame();
-    }
-  });
-}
-
-function mpSelectZone(z, isTaker) {
-  if (mpState.done || mpState.role === null) return;
-  if ((isTaker && mpState.role !== 'taker') || (!isTaker && mpState.role !== 'keeper')) return;
-
-  const frame = isTaker ? document.getElementById('mpTakerFrame') : document.getElementById('mpKeeperFrame');
-  frame.querySelectorAll('.mp-zone').forEach((el, i) => {
-    el.classList.toggle('selected', i === z);
-  });
-
-  mpState.myZone = z;
-  const btn = isTaker ? document.getElementById('mpTakerBtn') : document.getElementById('mpKeeperBtn');
-  if (btn) btn.disabled = false;
-}
-
-function mpShoot() {
-  if (mpState.myZone === null || mpState.role !== 'taker') return;
-
-  const playerRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId + '/players/host');
-  window.mpDbUpdate(playerRef, { zone: mpState.myZone });
-  document.getElementById('mpTakerBtn').disabled = true;
-}
-
-function mpDive() {
-  if (mpState.myZone === null || mpState.role !== 'keeper') return;
-
-  const playerRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId + '/players/guest');
-  window.mpDbUpdate(playerRef, { zone: mpState.myZone });
-  document.getElementById('mpKeeperBtn').disabled = true;
-}
-
-function showMpRoundResult() {
-  if (mpState.myZone === null || mpState.oppZone === null) return;
-
-  const goal = mpState.myZone !== mpState.oppZone;
-  const isGoal = (mpState.role === 'taker' && goal) || (mpState.role === 'keeper' && !goal);
-
-  if (isGoal) mpState.myScore++;
-  mpState.history.push(goal ? 'goal' : 'saved');
-  mpState.kick++;
-
-  const msg = goal ? '⚽ GOAL!' : '🧤 Saved!';
-  document.getElementById('mpResult').textContent = msg;
-  document.getElementById('mpResult').style.color = goal ? 'var(--green)' : 'var(--red)';
-
-  const takerZones = document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone');
-  const keeperZones = document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone');
-
-  if (mpState.role === 'taker') {
-    takerZones[mpState.myZone].classList.add('hit');
-    keeperZones[mpState.oppZone].classList.add('saved');
-  } else {
-    takerZones[mpState.oppZone].classList.add('hit');
-    keeperZones[mpState.myZone].classList.add('saved');
-  }
-
-  document.getElementById('mpYouScore').textContent = mpState.myScore;
-  disableMpInputs();
-
-  setTimeout(() => {
-    if (mpState.kick >= 5) {
-      endMpGame();
-    } else {
-      resetMpRound();
-    }
-  }, 2000);
-}
-
-function disableMpInputs() {
-  document.getElementById('mpTakerBtn').disabled = true;
-  document.getElementById('mpKeeperBtn').disabled = true;
-  document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'none');
-  document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'none');
-}
-
-function resetMpRound() {
-  mpState.myZone = null;
-  mpState.oppZone = null;
-  document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone').forEach(z => z.className = 'mp-zone');
-  document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone').forEach(z => z.className = 'mp-zone');
-  document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'auto');
-  document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'auto');
-  document.getElementById('mpTakerBtn').disabled = true;
-  document.getElementById('mpKeeperBtn').disabled = true;
-  document.getElementById('mpResult').textContent = '';
-  document.getElementById('mpKickNum').textContent = mpState.kick + 1;
-  renderMpKickDots();
-}
-
-function renderMpKickDots() {
-  const dots = document.getElementById('mpKickDots');
-  dots.innerHTML = Array.from({length:5},(_, i)=>{
-    const h = mpState.history[i];
-    return `<div class="kick-dot ${h==='goal'?'goal':h==='saved'?'saved':''}">${h==='goal'?'⚽':h==='saved'?'🧤':''}</div>`;
-  }).join('');
-}
-
-function renderMpGame() {
-  const name = FZ.user?.displayName || 'Player';
-  document.getElementById('mpYouName').textContent = name + (mpState.role==='taker'?' 🎯':' 🧤');
-  document.getElementById('mpYouScore').textContent = mpState.myScore;
-  document.getElementById('mpOppScore').textContent = mpState.oppScore;
-  document.getElementById('mpKickNum').textContent = mpState.kick + 1;
-
-  // Role-specific UI feedback
-  const sections = document.querySelectorAll('.mp-goal-section');
-  if (sections.length >= 2) {
-    if (mpState.role === 'taker') {
-      sections[0].style.opacity = '1';
-      sections[1].style.opacity = '0.5';
-      sections[1].style.pointerEvents = 'none';
-    } else {
-      sections[0].style.opacity = '0.5';
-      sections[1].style.opacity = '1';
-      sections[0].style.pointerEvents = 'none';
-    }
-  }
-}
-
-function closeMpPenalty() {
-  if (mpUnsubscribe) mpUnsubscribe();
-  if (mpCheckInterval) clearInterval(mpCheckInterval);
-
-  if (mpState.gameId && !mpState.done) {
-    const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId);
-    window.mpDbRemove(gameRef);
-  }
-
-  document.getElementById('mpPenaltyGame').style.display = 'none';
-  document.getElementById('mpModeSelector').classList.remove('show');
-  document.getElementById('mpCustomLobby').classList.remove('show');
-  document.getElementById('mpRoomCodeDisplay').style.display = 'none';
-  document.getElementById('tab-modes').style.display = 'block';
-  document.getElementById('joinCodeInput').value = '';
-  mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[], roomCode:null };
-}
-
-function endMpGame() {
-  mpState.done = true;
-  const xp = mpState.myScore * 100;
-  FZ.addXP(xp);
-  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
-  document.getElementById('mpResult').textContent = `Game Over! You scored ${mpState.myScore}/5 · +${xp} XP!`;
-  document.getElementById('mpClose').style.display = 'block';
-  showToast(`🏁 Game Over! ${mpState.myScore}/5 · +${xp} XP`);
-
-  if (mpState.gameId) {
-    const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId);
-    window.mpDbUpdate(gameRef, { status: 'finished' });
-  }
-}
-
-// ── DAILY TRIVIA ──
-const QUIZ = [
-  { q:'How many times has Brazil won the FIFA World Cup?', opts:['4','5','6','3'], ans:1 },
-  { q:'Which country hosted the 2022 FIFA World Cup?', opts:['Saudi Arabia','Qatar','UAE','Bahrain'], ans:1 },
-  { q:'Who scored the most goals in a single World Cup tournament?', opts:['Pelé','Ronaldo','Just Fontaine','Gerd Müller'], ans:2 },
-  { q:'What year did Messi finally win the World Cup?', opts:['2018','2022','2026','2014'], ans:1 },
-  { q:'Which team is nicknamed "The Seleção"?', opts:['Argentina','Portugal','Brazil','Spain'], ans:2 },
-];
-let quizDone = false;
-const todayQ = QUIZ[new Date().getDay() % QUIZ.length];
-
-function initQuiz() {
-  document.getElementById('quizQ').textContent = todayQ.q;
-  document.getElementById('quizOpts').innerHTML = todayQ.opts.map((o,i)=>`
-    <button class="btn btn--ghost btn--full" style="text-align:left;justify-content:flex-start;padding:12px 14px;font-size:.85rem" onclick="answerQuiz(${i},this)">${String.fromCharCode(65+i)}. ${o}</button>`).join('');
-}
-
-function answerQuiz(idx, btn) {
-  if (quizDone) return;
-  quizDone = true;
-  const btns = document.querySelectorAll('#quizOpts .btn');
-  btns.forEach((b,i)=>{
-    b.style.pointerEvents='none';
-    if (i===todayQ.ans) { b.style.borderColor='var(--green)';b.style.color='var(--green)'; }
-    else if (i===idx && idx!==todayQ.ans) { b.style.borderColor='var(--red)';b.style.color='var(--red)'; }
-  });
-  const correct = idx === todayQ.ans;
-  const resultEl = document.getElementById('quizResult');
-  if (correct) {
-    resultEl.textContent = '✅ Correct! +100 XP';
-    resultEl.style.color = 'var(--green)';
-    FZ.addXP(100);
-    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
-  } else {
-    resultEl.textContent = '❌ Wrong! Better luck tomorrow.';
-    resultEl.style.color = 'var(--red)';
-  }
-}
-
-function switchPlayTab(tab, btn) {
-  ['modes','daily','friends'].forEach(t=>{
-    const el = document.getElementById('tab-'+t);
-    if (el) el.style.display = t===tab?'block':'none';
-  });
+window.closePenalty = function() {
   document.getElementById('penaltyGame').style.display = 'none';
-  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('penaltyModeSelector').style.display = 'block';
+};
+
+window.restartPenalty = function() {
+  startSoloPenalty();
+};
+
+window.startMultiplayerPenalty = function() {
+  showToast('🔄 Finding opponent...');
+  // Placeholder: implement multiplayer matching
+  setTimeout(() => showToast('Coming soon!'), 1000);
+};
+
+// Tab switching
+window.switchTab = function(tab, btn) {
+  ['live', 'penalty'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.game-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (tab==='daily') initQuiz();
-}
-
-function showComingSoon() { showToast('🚀 Coming soon — stay tuned!'); }
-
-// ── INVITE FRIENDS ──
-function copyInviteLink() {
-  const url = FZ.getInviteUrl();
-  if (!url) { showToast('⚠️ Please sign in first'); return; }
-
-  navigator.clipboard.writeText(url).then(() => {
-    document.getElementById('inviteUrlDisplay').textContent = url;
-    document.getElementById('inviteUrlDisplay').style.display = 'block';
-    showToast('✓ Invite link copied!');
-    const btn = event.target;
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => { btn.textContent = '🔗 Copy Invite Link'; }, 2000);
-  });
-}
-
-function showInvitePopup() {
-  if (!FZ.user) return;
-  // Check if already shown today
-  const lastShown = localStorage.getItem('fz_invite_popup_' + new Date().toDateString());
-  if (lastShown) return;
-
-  // Show popup
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:999';
-  modal.innerHTML = `
-    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:320px;text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
-      <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-bottom:8px">Invite Friends</div>
-      <div style="font-size:.85rem;color:var(--text-2);line-height:1.6;margin-bottom:16px">Get <span style="color:var(--green);font-weight:700">+200 XP</span> when a friend joins using your link!</div>
-      <div style="display:flex;gap:10px;flex-direction:column">
-        <button onclick="copyInviteLinkFromPopup()" style="background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:12px;font-weight:700;cursor:pointer">🔗 Copy Invite Link</button>
-        <button onclick="this.closest('div').parentElement.remove()" style="background:var(--bg-3);color:var(--text-1);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-weight:700;cursor:pointer">Later</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  // Mark as shown today
-  localStorage.setItem('fz_invite_popup_' + new Date().toDateString(), '1');
-}
-
-function copyInviteLinkFromPopup() {
-  const url = FZ.getInviteUrl();
-  if (!url) { showToast('⚠️ Please sign in first'); return; }
-
-  navigator.clipboard.writeText(url).then(() => {
-    showToast('✓ Invite link copied!');
-    document.querySelector('[onclick="this.closest(\'div\').parentElement.remove()"]').closest('div').parentElement.remove();
-  });
-}
-
-// Check for referral code on load
-if (FZ.user) {
-  const appliedRef = FZ.checkAndApplyReferral();
-  if (appliedRef) {
-    showToast('✅ Referral bonus: +200 XP!');
-    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
-  }
-}
-
-// Show invite popup after a short delay
-setTimeout(() => {
-  if (FZ.user) {
-    showInvitePopup();
-  }
-}, 1500);
-
-initQuiz();
+};
 </script>
 </body>
 </html>
