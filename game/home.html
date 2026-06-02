@@ -65,9 +65,9 @@
       <div class="hero-match__watching">👁 <span id="watchCount">128K</span> watching</div>
     </div>
     <div class="score-row">
-      <div class="hero-team"><div class="hero-team__flag">🇧🇷</div><div class="hero-team__name">Brazil</div></div>
-      <div style="text-align:center"><div class="hero-score">2 — 1</div><div class="hero-time" id="heroTime">78:23</div></div>
-      <div class="hero-team"><div class="hero-team__flag">🇦🇷</div><div class="hero-team__name">Argentina</div></div>
+      <div class="hero-team"><div class="hero-team__flag" id="heroHomeFlag">🇧🇷</div><div class="hero-team__name" id="heroHomeName">Brazil</div></div>
+      <div style="text-align:center"><div class="hero-score" id="heroScore">2 — 1</div><div class="hero-time" id="heroTime">78:23</div></div>
+      <div class="hero-team"><div class="hero-team__flag" id="heroAwayFlag">🇦🇷</div><div class="hero-team__name" id="heroAwayName">Argentina</div></div>
     </div>
     <div class="hero-match__actions">
       <a href="predict.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">🎯 Predict</a>
@@ -80,7 +80,7 @@
 <!-- LIVE NOW -->
 <div style="margin-bottom:16px">
   <div class="section-header"><div class="section-title">Live Now</div><div class="see-all">See All</div></div>
-  <div class="live-scroll">
+  <div class="live-scroll" id="liveScrollEl">
     <div class="mini-match live"><div class="mini-match__teams">🇫🇷 vs 🇩🇪</div><div class="mini-match__score" style="color:var(--text-1)">1 — 0</div><div style="display:flex;align-items:center;gap:4px;margin-top:4px"><div class="live-dot"></div><span style="font-size:.68rem;color:var(--red)">54'</span></div></div>
     <div class="mini-match live"><div class="mini-match__teams">🇵🇹 vs 🇺🇾</div><div class="mini-match__score" style="color:var(--text-1)">0 — 0</div><div style="display:flex;align-items:center;gap:4px;margin-top:4px"><div class="live-dot"></div><span style="font-size:.68rem;color:var(--red)">38'</span></div></div>
     <div class="mini-match"><div class="mini-match__teams">🇯🇵 vs 🇪🇸</div><div class="mini-match__score">—</div><div class="mini-match__time">19:00</div></div>
@@ -149,7 +149,7 @@ function renderFeed(posts) {
         <div style="font-size:1.1rem;color:var(--text-3);cursor:pointer">•••</div>
       </div>
       <div class="post__text">${p.text}</div>
-      ${p.hasImg?`<div class="post__image">${p.imgEmoji}</div>`:''}
+      ${p.hasImg?(p.imgUrl?`<img src="${p.imgUrl}" class="post__image" loading="lazy" onerror="this.style.display='none'" style="font-size:0">`:`<div class="post__image">${p.imgEmoji||'⚽'}</div>`):''}
       <div class="post__actions">
         <button class="post-action" onclick="likePost(this,${i})" data-liked="false">❤️ ${formatCount(p.likes)}</button>
         <button class="post-action">💬 ${formatCount(p.comments)}</button>
@@ -180,13 +180,55 @@ setInterval(()=>{
   document.getElementById('watchCount').textContent = (n/1000).toFixed(0)+'K';
 }, 3000);
 
-// Live clock
-let sec = 78*60+23;
+// Fetch real match data from backend
+async function loadLiveMatch() {
+  try {
+    const res = await fetch('/api/matches');
+    const data = await res.json();
+    if (!data.matches || data.matches.length === 0) return;
+
+    const m = data.matches.find(x => x.status === 'IN_PLAY') || data.matches[0];
+    const homeScore = m.score?.home ?? '—';
+    const awayScore = m.score?.away ?? '—';
+
+    // Update hero card with real data
+    const hero = document.querySelector('.hero-match');
+    hero.innerHTML = `
+      <div class="hero-match__bg"></div>
+      <div class="hero-match__inner">
+        <div class="hero-match__top">
+          <div class="live-badge"><span class="live-dot"></span>${m.status==='IN_PLAY'?'Live':'Soon'}</div>
+          <div class="hero-match__watching">👁 <span id="watchCount">128K</span> watching</div>
+        </div>
+        <div class="score-row">
+          <div class="hero-team"><div class="hero-team__flag">${getFlagEmoji(m.homeTeam.short)}</div><div class="hero-team__name">${m.homeTeam.short}</div></div>
+          <div style="text-align:center"><div class="hero-score">${homeScore} — ${awayScore}</div><div class="hero-time" id="heroTime">${m.minute?m.minute+"'":"—"}</div></div>
+          <div class="hero-team"><div class="hero-team__flag">${getFlagEmoji(m.awayTeam.short)}</div><div class="hero-team__name">${m.awayTeam.short}</div></div>
+        </div>
+        <div class="hero-match__actions">
+          <a href="predict.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">🎯 Predict</a>
+          <a href="predict.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">💬 Live Chat</a>
+          <a href="play.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">🎮 Play</a>
+        </div>
+      </div>
+    `;
+  } catch (e) { console.error('Match load failed:', e); }
+}
+
+function getFlagEmoji(code) {
+  const flags={'BRA':'🇧🇷','ARG':'🇦🇷','GER':'🇩🇪','FRA':'🇫🇷','ENG':'🇬🇧','ESP':'🇪🇸','ITA':'🇮🇹','NED':'🇳🇱','POR':'🇵🇹','BEL':'🇧🇪','JPN':'🇯🇵','KOR':'🇰🇷','USA':'🇺🇸','MEX':'🇲🇽','URY':'🇺🇾','AUS':'🇦🇺','POL':'🇵🇱','SEN':'🇸🇳','CAN':'🇨🇦','QAT':'🇶🇦'};
+  return flags[code]||'⚽';
+}
+
+loadLiveMatch();
+setInterval(loadLiveMatch, 30000); // Update every 30 seconds
+
+// Flicker watching count
 setInterval(()=>{
-  sec++;
-  const m = Math.floor(sec/60), s = sec%60;
-  if (m <= 90) document.getElementById('heroTime').textContent = m+':'+(s<10?'0':'')+s;
-}, 1000);
+  const n = 128000 + Math.floor((Math.random()-.5)*2000);
+  const el = document.getElementById('watchCount');
+  if (el) el.textContent = (n/1000).toFixed(0)+'K';
+}, 3000);
 
 renderFeed(POSTS);
 </script>

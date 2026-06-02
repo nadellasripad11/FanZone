@@ -237,8 +237,49 @@ onAuthStateChanged(auth, u => {
 <script>
 let selectedWinner = null;
 let homeG = 2, awayG = 1;
+let currentMatch = null;
 
 const XP_MAP = { brazil:150, draw:200, germany:175 };
+
+// Load real match data
+async function loadNextMatch() {
+  try {
+    const res = await fetch('/api/matches');
+    const data = await res.json();
+    if (!data.matches || data.matches.length === 0) return;
+
+    const upcoming = data.matches.find(m => m.status === 'SCHEDULED') || data.matches[0];
+    currentMatch = upcoming;
+
+    const banner = document.querySelector('.match-banner');
+    const date = new Date(upcoming.utcDate);
+    const timeStr = date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+    banner.innerHTML = `
+      <div class="match-banner__label">🔥 ${upcoming.competition || 'Match'}</div>
+      <div class="match-banner__teams">
+        <div class="mb-team"><div class="mb-team__flag">${getFlagEmoji(upcoming.homeTeam.short)}</div><div class="mb-team__name">${upcoming.homeTeam.short}</div></div>
+        <div class="mb-vs">VS</div>
+        <div class="mb-team"><div class="mb-team__flag">${getFlagEmoji(upcoming.awayTeam.short)}</div><div class="mb-team__name">${upcoming.awayTeam.short}</div></div>
+      </div>
+      <div class="mb-kickoff">⏱ ${timeStr} UTC</div>
+    `;
+
+    // Reset stepper
+    homeG = 0; awayG = 0;
+    document.getElementById('homeScore').textContent = '0';
+    document.getElementById('awayScore').textContent = '0';
+    document.querySelector('.stepper-team__name').textContent = `${getFlagEmoji(upcoming.homeTeam.short)} ${upcoming.homeTeam.short}`;
+    document.querySelectorAll('.stepper-team__name')[1].textContent = `${getFlagEmoji(upcoming.awayTeam.short)} ${upcoming.awayTeam.short}`;
+  } catch (e) { console.error('Match load failed:', e); }
+}
+
+function getFlagEmoji(code) {
+  const flags={'BRA':'🇧🇷','ARG':'🇦🇷','GER':'🇩🇪','FRA':'🇫🇷','ENG':'🇬🇧','ESP':'🇪🇸','ITA':'🇮🇹','NED':'🇳🇱','POR':'🇵🇹','BEL':'🇧🇪','JPN':'🇯🇵','KOR':'🇰🇷','USA':'🇺🇸','MEX':'🇲🇽','URY':'🇺🇾','AUS':'🇦🇺','POL':'🇵🇱','SEN':'🇸🇳','CAN':'🇨🇦','QAT':'🇶🇦'};
+  return flags[code]||'⚽';
+}
+
+loadNextMatch();
 const MOCK_PREDICTIONS = [
   { match:'🇧🇷 Brazil vs 🇦🇷 Argentina', pick:'Brazil Win · 2-1', scorer:'Vinicius Jr.', status:'correct', xp:'+400 XP' },
   { match:'🇫🇷 France vs 🇩🇪 Germany', pick:'France Win · 1-0', scorer:'Mbappé', status:'wrong', xp:'+0 XP' },
