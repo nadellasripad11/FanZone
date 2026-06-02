@@ -142,11 +142,15 @@ window._signInEmail = (e,p) => signInWithEmailAndPassword(auth,e,p);
 
 onAuthStateChanged(auth, user => {
   FZ.user = user;
-  if (FZ.isOnboarded()) {
+  if (user && FZ.isOnboarded()) {
+    // User is already onboarded, go to home
     window.location.href = 'home.html';
-  } else {
+  } else if (!user) {
+    // User not signed in, show auth screen
     document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('onboardWrap').style.display = 'none';
   }
+  // If user is signed in but not onboarded, onboarding will be started by submitEmail()
 });
 </script>
 <script>
@@ -348,6 +352,9 @@ window.submitEmail = async function() {
   try {
     if (isSignUp) await window._createEmail(email, pass);
     else await window._signInEmail(email, pass);
+    // After successful auth, hide email form and start onboarding
+    hideEmailFlow();
+    startOnboarding();
   } catch(e) {
     const msgs = { 'auth/email-already-in-use':'Email already registered.', 'auth/weak-password':'Password too short.', 'auth/invalid-credential':'Wrong email or password.', 'auth/user-not-found':'No account found.' };
     errEl.textContent = msgs[e.code] || 'Error. Try again.';
