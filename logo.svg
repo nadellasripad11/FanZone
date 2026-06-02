@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <style>
+      @keyframes glow {
+        0%, 100% { filter: drop-shadow(0 0 4px #ccff00) drop-shadow(0 0 8px #88ff00); }
+        50% { filter: drop-shadow(0 0 8px #ccff00) drop-shadow(0 0 16px #88ff00); }
+      }
+      .soccer-ball { animation: glow 2s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="200" fill="#0d0d0d" rx="40"/>
+
+  <!-- Neon border -->
+  <rect width="200" height="200" fill="none" stroke="#ccff00" stroke-width="3" rx="40" style="filter: drop-shadow(0 0 8px #ccff00);"/>
+
+  <!-- Soccer ball -->
+  <g class="soccer-ball" transform="translate(100,100)">
+    <!-- Circle -->
+    <circle cx="0" cy="0" r="60" fill="#fff" stroke="#000" stroke-width="1.5"/>
+
+    <!-- Pentagon pentagons (5 total) -->
+    <polygon points="0,-36 -20,-20 -30,0 -20,20 0,36 20,20 30,0 20,-20" fill="#000" opacity="0.9"/>
+    <polygon points="36,0 20,20 20,36 0,36 -12,28 -24,12" fill="#000" opacity="0.9"/>
+    <polygon points="-36,0 -20,20 -20,36 0,36 12,28 24,12" fill="#000" opacity="0.9"/>
+    <polygon points="36,0 20,-20 20,-36 0,-36 -12,-28 -24,-12" fill="#000" opacity="0.9"/>
+    <polygon points="-36,0 -20,-20 -20,-36 0,-36 12,-28 24,-12" fill="#000" opacity="0.9"/>
+
+    <!-- Hexagon pattern -->
+    <g opacity="0.8">
+      <polygon points="0,-18 10,-9 10,9 0,18 -10,9 -10,-9" fill="none" stroke="#000" stroke-width="1"/>
+      <polygon points="18,0 22,9 18,18 -2,18 -6,9 -2,0" fill="none" stroke="#000" stroke-width="1"/>
+      <polygon points="18,0 22,-9 18,-18 -2,-18 -6,-9 -2,0" fill="none" stroke="#000" stroke-width="1"/>
+      <polygon points="-18,0 -22,9 -18,18 2,18 6,9 2,0" fill="none" stroke="#000" stroke-width="1"/>
+      <polygon points="-18,0 -22,-9 -18,-18 2,-18 6,-9 2,0" fill="none" stroke="#000" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
