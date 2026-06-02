@@ -33,28 +33,47 @@
     .reaction-btn__emoji { font-size:1.8rem;line-height:1; }
     .reaction-btn__label { font-size:.6rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:600; }
 
-    /* PENALTY GAME */
+    /* PENALTY GAME - FULL VISUAL */
     #penaltyGame { display:none;padding:0 16px;margin-bottom:20px; }
-    .penalty-arena { background:linear-gradient(160deg,#0a1a0a,#0d1a0d);border:1px solid var(--border-green);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden; }
-    .goal-frame { width:100%;max-width:300px;margin:0 auto 16px;aspect-ratio:3/2;background:rgba(0,0,0,.4);border:3px solid rgba(255,255,255,.2);border-radius:4px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;padding:6px;position:relative; }
-    .goal-zone { border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.4rem; }
-    .goal-zone:hover { background:rgba(204,255,0,.12);border-color:var(--border-green); }
-    .goal-zone.hit { background:rgba(204,255,0,.25);border-color:var(--green);animation:goalFlash .5s ease; }
-    .goal-zone.saved { background:var(--red-dim);border-color:rgba(255,68,68,.5);animation:saveFlash .5s ease; }
-    @keyframes goalFlash { 0%,100%{opacity:1} 50%{opacity:.5;transform:scale(.96)} }
-    @keyframes saveFlash { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .penalty-arena { background:linear-gradient(180deg,#1a3a1a 0%,#0d1a0d 100%);border:1px solid var(--border-green);border-radius:var(--radius);padding:16px;text-align:center;position:relative;overflow:hidden; }
 
-    .score-board { display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px; }
-    .score-board__you { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--green);line-height:1; }
-    .score-board__keeper { font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--red);line-height:1; }
-    .penalty-result { font-family:var(--font-display);font-size:1.4rem;font-weight:900;min-height:36px;letter-spacing:.04em; }
-    .penalty-result.goal { color:var(--green); }
-    .penalty-result.saved { color:var(--red); }
+    /* FOOTBALL PITCH */
+    .pitch { background:linear-gradient(180deg,#1a4d1a 0%,#1a3a1a 50%,#1a4d1a 100%);border:2px solid rgba(255,255,255,.3);border-radius:4px;position:relative;width:100%;aspect-ratio:3/4;margin:0 auto 16px;max-width:250px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:8px;box-sizing:border-box; }
 
-    .kicks-row { display:flex;gap:6px;justify-content:center;margin:10px 0; }
-    .kick-dot { width:28px;height:28px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem; }
+    .pitch::before { content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:1px;background:rgba(255,255,255,.2); }
+
+    /* GOAL POST */
+    .goal-post { position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:180px;height:2px;background:rgba(255,255,255,.5);border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,.3); }
+    .goal-post::before { content:'';position:absolute;left:0;top:-60px;width:2px;height:60px;background:rgba(255,255,255,.4); }
+    .goal-post::after { content:'';position:absolute;right:0;top:-60px;width:2px;height:60px;background:rgba(255,255,255,.4); }
+
+    /* KEEPER */
+    .keeper { position:absolute;bottom:8px;font-size:3rem;transition:all .1s;z-index:10;width:50px;height:50px;display:flex;align-items:center;justify-content:center; }
+
+    /* BALL */
+    .ball { position:absolute;width:8px;height:8px;background:radial-gradient(circle at 30% 30%,#fff8,#000);border-radius:50%;z-index:5; }
+
+    /* KICKER */
+    .kicker { position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);font-size:2rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;z-index:2; }
+
+    .score-board { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px; }
+    .score-board__player { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center; }
+    .score-board__label { font-size:.65rem;color:var(--text-3);text-transform:uppercase;margin-bottom:4px; }
+    .score-board__score { font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green);line-height:1; }
+
+    .penalty-result { font-family:var(--font-display);font-size:1.3rem;font-weight:900;min-height:32px;letter-spacing:.04em;margin-bottom:10px; }
+    .penalty-result.goal { color:var(--green);text-shadow:0 0 8px rgba(204,255,0,.4); }
+    .penalty-result.saved { color:var(--red);text-shadow:0 0 8px rgba(255,68,68,.4); }
+
+    .kicks-row { display:flex;gap:4px;justify-content:center;margin:10px 0;flex-wrap:wrap; }
+    .kick-dot { width:24px;height:24px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem; }
     .kick-dot.goal { background:rgba(204,255,0,.2);border-color:var(--border-green); }
     .kick-dot.saved { background:var(--red-dim);border-color:rgba(255,68,68,.4); }
+
+    @keyframes shootBall { 0%{opacity:1;transform:translate(0,0)} 100%{opacity:0;transform:translate(var(--tx),var(--ty))} }
+    @keyframes kickAnimation { 0%{transform:translateX(-50%) rotateZ(-20deg)} 50%{transform:translateX(-50%) rotateZ(10deg)} 100%{transform:translateX(-50%) rotateZ(0deg)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
     /* MODE SELECTOR */
     .mode-selector { padding:0 16px;margin-bottom:20px; }
@@ -188,33 +207,44 @@
   <!-- Solo Penalty Game -->
   <div id="penaltyGame">
     <div class="penalty-arena">
-      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:900;margin-bottom:6px">⚽ Penalty Shootout</div>
-      <div style="font-size:.85rem;color:var(--text-3);margin-bottom:14px">Score 5 penalties vs the AI (35% save rate)</div>
+      <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:8px">⚽ PENALTY SHOOTOUT</div>
+      <div style="font-size:.8rem;color:var(--text-3);margin-bottom:12px">Kick <span id="kickNum">1</span> of 5</div>
 
+      <!-- SCORE -->
       <div class="score-board">
-        <div>
-          <div class="score-board__you" id="penYou">0</div>
-          <div style="font-size:.65rem;color:var(--text-3);margin-top:4px">You</div>
+        <div class="score-board__player">
+          <div class="score-board__label">You</div>
+          <div class="score-board__score" id="penYou">0</div>
         </div>
-        <div style="font-family:var(--font-display);font-size:1.6rem;color:var(--text-3)">—</div>
-        <div>
-          <div class="score-board__keeper" id="penKeeper">0</div>
-          <div style="font-size:.65rem;color:var(--text-3);margin-top:4px">AI</div>
+        <div class="score-board__player">
+          <div class="score-board__label">Keeper</div>
+          <div class="score-board__score" id="penKeeper">0</div>
         </div>
       </div>
 
-      <div style="font-size:.8rem;color:var(--text-3);margin-bottom:12px">Kick <span id="kickNum">1</span> of 5</div>
-      <div class="kicks-row" id="kickDots"></div>
+      <!-- RESULT MESSAGE -->
       <div class="penalty-result" id="penResult"></div>
 
-      <div class="goal-frame" id="goalFrame">
-        <div class="goal-zone" onclick="shoot(0)"></div>
-        <div class="goal-zone" onclick="shoot(1)"></div>
-        <div class="goal-zone" onclick="shoot(2)"></div>
-        <div class="goal-zone" onclick="shoot(3)"></div>
-        <div class="goal-zone" onclick="shoot(4)"></div>
-        <div class="goal-zone" onclick="shoot(5)"></div>
+      <!-- FOOTBALL PITCH WITH GOAL -->
+      <div class="pitch" id="pitchEl">
+        <div class="keeper" id="keeper">🧤</div>
+        <div class="ball" id="ball" style="display:none"></div>
+        <div class="kicker" id="kicker">⚽</div>
+        <div class="goal-post"></div>
       </div>
+
+      <!-- SHOT DIRECTION SELECTOR -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:16px 0;max-width:200px;margin-left:auto;margin-right:auto" id="shotSelector">
+        <button onclick="shoot(0)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↖️</button>
+        <button onclick="shoot(1)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">⬆️</button>
+        <button onclick="shoot(2)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↗️</button>
+        <button onclick="shoot(3)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↙️</button>
+        <button onclick="shoot(4)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">⬇️</button>
+        <button onclick="shoot(5)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↘️</button>
+      </div>
+
+      <!-- KICK PROGRESS -->
+      <div class="kicks-row" id="kickDots"></div>
 
       <button class="btn" id="penClose" onclick="closePenalty()" style="display:none;margin-top:10px">✕ Close</button>
       <button class="btn" id="penRestart" onclick="restartPenalty()" style="display:none;margin-top:10px">🔄 Play Again</button>
@@ -363,58 +393,102 @@ window.startSoloPenalty = function() {
 
 window.shoot = function(zone) {
   window.penaltyState.currentZone = zone;
-  highlightZone(zone);
+
+  // Disable buttons while shooting
+  document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = true);
+
+  // Animate kicker
+  const kicker = document.getElementById('kicker');
+  kicker.style.animation = 'kickAnimation .3s ease';
 
   setTimeout(() => {
+    kicker.style.animation = '';
+
+    // AI keeper moves to a random zone
     const aiZone = Math.floor(Math.random() * 6);
     const isGoal = zone !== aiZone;
 
-    if (isGoal) {
-      window.penaltyState.playerScore++;
-      document.getElementById('penResult').textContent = '⚽ GOAL!';
-      document.getElementById('penResult').className = 'penalty-result goal';
-      document.getElementById(goalFrame).children[zone].classList.add('hit');
-    } else {
-      document.getElementById('penResult').textContent = '🧤 SAVED!';
-      document.getElementById('penResult').className = 'penalty-result saved';
-      document.getElementById('goalFrame').children[zone].classList.add('saved');
-      document.getElementById('goalFrame').children[aiZone].classList.add('saved');
-    }
+    // Move keeper
+    const keeper = document.getElementById('keeper');
+    const zonePositions = ['↖️', '⬆️', '↗️', '↙️', '⬇️', '↘️'];
+    keeper.textContent = zonePositions[aiZone];
+    keeper.style.transition = 'none';
 
-    window.penaltyState.kicks++;
-    document.getElementById('penYou').textContent = window.penaltyState.playerScore;
+    // Animate ball trajectory
+    const ball = document.getElementById('ball');
+    const pitch = document.getElementById('pitchEl');
+    const pitchRect = pitch.getBoundingClientRect();
+    const pitchWidth = pitch.offsetWidth;
+    const pitchHeight = pitch.offsetHeight;
 
-    if (window.penaltyState.kicks >= 5) {
-      setTimeout(endPenalty, 1000);
-    } else {
-      setTimeout(resetPenalty, 1500);
-    }
+    // Ball start position (kicker)
+    const startX = pitchWidth / 2;
+    const startY = pitchHeight - 15;
+
+    // Ball end position based on shot zone
+    const zoneOffsets = [
+      {x: -60, y: -60}, // top-left
+      {x: 0, y: -70},   // top-center
+      {x: 60, y: -60},  // top-right
+      {x: -60, y: -20}, // bottom-left
+      {x: 0, y: -30},   // bottom-center
+      {x: 60, y: -20}   // bottom-right
+    ];
+
+    const endX = startX + zoneOffsets[zone].x;
+    const endY = startY + zoneOffsets[zone].y;
+
+    ball.style.left = startX + 'px';
+    ball.style.top = startY + 'px';
+    ball.style.display = 'block';
+    ball.style.setProperty('--tx', (endX - startX) + 'px');
+    ball.style.setProperty('--ty', (endY - startY) + 'px');
+    ball.style.animation = 'shootBall .4s ease-out forwards';
+
+    setTimeout(() => {
+      ball.style.display = 'none';
+
+      if (isGoal) {
+        window.penaltyState.playerScore++;
+        document.getElementById('penResult').textContent = '⚽ GOAL!';
+        document.getElementById('penResult').className = 'penalty-result goal';
+        keeper.style.animation = 'shake .2s';
+      } else {
+        document.getElementById('penResult').textContent = '🧤 SAVED!';
+        document.getElementById('penResult').className = 'penalty-result saved';
+        keeper.style.animation = 'bounce .3s';
+      }
+
+      window.penaltyState.kicks++;
+      document.getElementById('penYou').textContent = window.penaltyState.playerScore;
+
+      if (window.penaltyState.kicks >= 5) {
+        setTimeout(endPenalty, 1000);
+      } else {
+        setTimeout(resetPenalty, 1500);
+      }
+    }, 400);
   }, 300);
 };
-
-function highlightZone(zone) {
-  document.querySelectorAll('.goal-zone').forEach((z, i) => {
-    if (i === zone) z.style.background = 'rgba(204,255,0,.3)';
-    else z.style.pointerEvents = 'none';
-  });
-}
 
 function renderPenaltyUI() {
   document.getElementById('penYou').textContent = '0';
   document.getElementById('penKeeper').textContent = '0';
   document.getElementById('kickNum').textContent = '1';
   document.getElementById('penResult').textContent = '';
-  document.getElementById('goalFrame').innerHTML = Array(6).fill().map((_, i) =>
-    `<div class="goal-zone" onclick="shoot(${i})"></div>`
-  ).join('');
+  document.getElementById('keeper').textContent = '🧤';
+  document.getElementById('kicker').style.animation = '';
+  document.getElementById('ball').style.display = 'none';
+  document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = false);
 }
 
 function resetPenalty() {
   document.getElementById('kickNum').textContent = (window.penaltyState.kicks + 1);
   document.getElementById('penResult').textContent = '';
-  document.getElementById('goalFrame').innerHTML = Array(6).fill().map((_, i) =>
-    `<div class="goal-zone" onclick="shoot(${i})"></div>`
-  ).join('');
+  document.getElementById('keeper').textContent = '🧤';
+  document.getElementById('kicker').style.animation = '';
+  document.getElementById('ball').style.display = 'none';
+  document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = false);
 }
 
 window.endPenalty = function() {
