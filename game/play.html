@@ -33,32 +33,6 @@
     .reaction-btn__emoji { font-size:1.8rem;line-height:1; }
     .reaction-btn__label { font-size:.6rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:600; }
 
-    /* LEADERBOARD & TRENDING */
-    .leaderboard { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px; }
-    .leaderboard__title { font-size:.65rem;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:8px; }
-    .leaderboard-item { display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.8rem; }
-    .leaderboard-item:last-child { border:none; }
-    .leaderboard-rank { color:var(--green);font-weight:700;min-width:20px; }
-    .leaderboard-name { flex:1;margin:0 8px;color:var(--text-2); }
-    .leaderboard-score { color:var(--green);font-weight:700; }
-
-    .emoji-wars { display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px; }
-    .emoji-war-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center; }
-    .emoji-war-emoji { font-size:1.8rem;margin-bottom:4px; }
-    .emoji-war-count { font-size:1.2rem;font-weight:900;color:var(--green);font-family:var(--font-display); }
-    .emoji-war-label { font-size:.6rem;color:var(--text-3);margin-top:2px;text-transform:uppercase; }
-
-    .viral-moment { background:linear-gradient(135deg,rgba(204,255,0,.06),rgba(204,255,0,.02));border:1px solid var(--border-green);border-radius:var(--radius-sm);padding:10px;margin-bottom:10px; }
-    .viral-moment__header { display:flex;align-items:center;justify-content:space-between;margin-bottom:6px; }
-    .viral-moment__user { font-weight:700;font-size:.8rem; }
-    .viral-moment__emoji { font-size:1.2rem; }
-    .viral-moment__reaction { font-size:.8rem;color:var(--text-2);margin-bottom:4px; }
-    .viral-moment__stats { font-size:.7rem;color:var(--green);display:flex;gap:8px; }
-
-    .comment-box { background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;margin-top:4px;font-size:.75rem; }
-    .comment-text { color:var(--text-2);margin-bottom:4px; }
-    .comment-author { color:var(--text-3);font-size:.65rem; }
-
     /* PENALTY GAME */
     #penaltyGame { display:none;padding:0 16px;margin-bottom:20px; }
     .penalty-arena { background:linear-gradient(160deg,#0a1a0a,#0d1a0d);border:1px solid var(--border-green);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden; }
@@ -139,29 +113,6 @@
     <div class="reaction-feed" id="reactionFeed"></div>
   </div>
 
-  <!-- EMOJI WARS -->
-  <div style="margin-bottom:14px">
-    <div style="font-size:.75rem;color:var(--text-3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:8px">⚡ Emoji Wars</div>
-    <div class="emoji-wars" id="emojiWars">
-      <div class="emoji-war-card"><div class="emoji-war-emoji">😍</div><div class="emoji-war-count" id="count-😍">0</div><div class="emoji-war-label">Love</div></div>
-      <div class="emoji-war-card"><div class="emoji-war-emoji">🔥</div><div class="emoji-war-count" id="count-🔥">0</div><div class="emoji-war-label">Fire</div></div>
-      <div class="emoji-war-card"><div class="emoji-war-emoji">⚽</div><div class="emoji-war-count" id="count-⚽">0</div><div class="emoji-war-label">Goal</div></div>
-      <div class="emoji-war-card"><div class="emoji-war-emoji">🎉</div><div class="emoji-war-count" id="count-🎉">0</div><div class="emoji-war-label">Party</div></div>
-    </div>
-  </div>
-
-  <!-- TOP REACTORS -->
-  <div class="leaderboard" id="leaderboard">
-    <div class="leaderboard__title">🏆 Top Reactors This Match</div>
-    <div id="leaderboardContent"></div>
-  </div>
-
-  <!-- VIRAL MOMENTS -->
-  <div style="margin-bottom:14px">
-    <div style="font-size:.75rem;color:var(--text-3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:8px">🚀 Viral Moments</div>
-    <div id="viralMoments"></div>
-  </div>
-
   <div style="margin-bottom:14px">
     <div style="font-size:.75rem;color:var(--text-3);text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:8px">Quick React</div>
     <div class="reaction-grid">
@@ -189,6 +140,14 @@
         <span class="reaction-emoji">🎉</span>
         <span class="reaction-btn__label">Party</span>
       </button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px">
+    <div style="font-size:.65rem;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:8px">🏆 Top Reactors</div>
+    <div id="leaderboardQuick" style="display:flex;flex-direction:column;gap:4px;font-size:.8rem">
+      <!-- Top reactors will be shown here -->
     </div>
   </div>
 
@@ -354,98 +313,43 @@ window.postReaction = async function(emoji, type) {
 
 function renderReactionFeed() {
   const feedEl = document.getElementById('reactionFeed');
-
-  // Add random likes to each reaction
-  const reactionsWithLikes = liveReactions.map(r => ({
-    ...r,
-    likes: Math.floor(Math.random()*500)+10
-  }));
-
-  feedEl.innerHTML = reactionsWithLikes.map(r => `
+  feedEl.innerHTML = liveReactions.map(r => `
     <div class="reaction-item">
       <span class="reaction-emoji">${r.e}</span>
       <span class="reaction-user">${r.u}</span>
-      <span class="reaction-count" onclick="showComments(this)">${r.likes}</span>
+      <span class="reaction-count">${Math.floor(Math.random()*500)+10}</span>
     </div>
   `).join('');
 
-  // Emoji Wars - count by emoji
+  // Trending emoji
   const emojiCounts = {};
   liveReactions.forEach(r => {
     emojiCounts[r.e] = (emojiCounts[r.e] || 0) + 1;
   });
+  const trending = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1])[0];
+  if (trending) {
+    document.getElementById('trendingEmoji').textContent = trending[0];
+  }
 
-  // Update emoji wars display
-  ['😍','🔥','⚽','🎉'].forEach(emoji => {
-    const count = emojiCounts[emoji] || 0;
-    const el = document.getElementById('count-' + emoji);
-    if (el) el.textContent = count;
-  });
-
-  // Leaderboard - top reactors
+  // Top reactors leaderboard
   const userCounts = {};
   liveReactions.forEach(r => {
     userCounts[r.u] = (userCounts[r.u] || 0) + 1;
   });
   const topReactors = Object.entries(userCounts)
     .sort((a,b) => b[1]-a[1])
-    .slice(0, 5);
-
-  const leaderboardEl = document.getElementById('leaderboardContent');
-  leaderboardEl.innerHTML = topReactors.map((entry, i) => `
-    <div class="leaderboard-item">
-      <span class="leaderboard-rank">#${i+1}</span>
-      <span class="leaderboard-name">${entry[0]}</span>
-      <span class="leaderboard-score">${entry[1]} 🔥</span>
-    </div>
-  `).join('');
-
-  // Viral moments - reactions with 100+ likes
-  const viralMoments = reactionsWithLikes
-    .filter(r => r.likes >= 100)
-    .sort((a,b) => b.likes - a.likes)
     .slice(0, 3);
 
-  const viralEl = document.getElementById('viralMoments');
-  viralEl.innerHTML = viralMoments.map(r => `
-    <div class="viral-moment">
-      <div class="viral-moment__header">
-        <div class="viral-moment__user">${r.u}</div>
-        <div class="viral-moment__emoji">${r.e}</div>
+  const leaderEl = document.getElementById('leaderboardQuick');
+  if (leaderEl) {
+    leaderEl.innerHTML = topReactors.map((entry, i) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+        <span style="color:var(--text-3)">#${i+1} ${entry[0]}</span>
+        <span style="color:var(--green);font-weight:700">${entry[1]}</span>
       </div>
-      <div class="viral-moment__stats">
-        <span>❤️ ${r.likes}</span>
-        <span onclick="shareViral()" style="cursor:pointer">📱 Share</span>
-      </div>
-    </div>
-  `).join('');
-
-  // Trending emoji
-  const trending = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1])[0];
-  if (trending) {
-    document.getElementById('trendingEmoji').textContent = trending[0];
+    `).join('');
   }
 }
-
-window.showComments = function(el) {
-  const alreadyOpen = el.querySelector('.comment-box');
-  if (alreadyOpen) {
-    alreadyOpen.remove();
-    return;
-  }
-  const comments = [
-    {author:'FootballFan23', text:'INSANE 🔥'},
-    {author:'SoccerKing', text:'Best moment ever!'},
-  ];
-  const html = `<div class="comment-box" style="margin-top:4px">${comments.map(c =>
-    `<div class="comment-text">"${c.text}"<div class="comment-author">— ${c.author}</div></div>`
-  ).join('')}</div>`;
-  el.insertAdjacentHTML('afterend', html);
-};
-
-window.shareViral = function() {
-  showToast('🚀 Shared to TikTok!');
-};
 
 // Penalty Game
 window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, currentZone: null };
@@ -536,27 +440,29 @@ window.restartPenalty = function() {
 };
 
 window.startMultiplayerPenalty = function() {
-  const profile = FZ.getProfile();
   if (!window.authUser) {
     showToast('Sign in to play multiplayer');
     return;
   }
 
-  // Show multiplayer options
-  const html = `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000">
-      <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:300px;width:90%">
-        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:16px">⚽ Multiplayer</div>
+  showToast('⚽ Choose: Create Room or Join with Code');
 
-        <button onclick="createRoom()" style="width:100%;background:var(--green);color:#000;font-weight:700;padding:12px;border:none;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px">
-          + Create Room
+  const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
+
+  const html = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000">
+      <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:280px;width:90%">
+        <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-bottom:14px">⚽ Multiplayer</div>
+
+        <button onclick="createMultiRoom('${roomCode}')" style="width:100%;background:var(--green);color:#000;font-weight:700;padding:12px;border:none;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px;font-size:.9rem">
+          ➕ Create Room
         </button>
 
-        <button onclick="joinRoomPrompt()" style="width:100%;background:var(--bg-2);border:1px solid var(--border);color:var(--text-1);font-weight:700;padding:12px;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px">
+        <button onclick="joinMultiRoom()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);font-weight:700;padding:12px;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px;font-size:.9rem">
           🔗 Join Room
         </button>
 
-        <button onclick="closeMultiplayer()" style="width:100%;background:transparent;color:var(--text-3);border:none;cursor:pointer;padding:8px">
+        <button onclick="closeMultiDialog()" style="width:100%;background:transparent;border:none;color:var(--text-3);cursor:pointer;padding:8px;font-size:.85rem">
           Cancel
         </button>
       </div>
@@ -565,29 +471,25 @@ window.startMultiplayerPenalty = function() {
   document.body.insertAdjacentHTML('beforeend', html);
 };
 
-window.createRoom = function() {
-  const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
-  window.currentRoomCode = roomCode;
-  closeMultiplayer();
+window.createMultiRoom = function(code) {
+  window.currentRoomCode = code;
+  closeMultiDialog();
 
   const html = `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000">
-      <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:300px;width:90%">
-        <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-bottom:16px">🎮 Waiting for Friend</div>
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px">
+      <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:300px;width:100%">
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:900;margin-bottom:14px">⏳ Waiting for Friend</div>
 
-        <div style="background:var(--bg-2);border:2px solid var(--border-green);border-radius:var(--radius-sm);padding:16px;text-align:center;margin-bottom:16px">
-          <div style="font-size:.8rem;color:var(--text-3);margin-bottom:6px">Room Code</div>
-          <div style="font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--green);letter-spacing:.1em">${roomCode}</div>
-          <button onclick="copyCode('${roomCode}')" style="background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-weight:700;cursor:pointer;margin-top:10px;width:100%">
-            📋 Copy Code
-          </button>
+        <div style="background:var(--bg-2);border:2px solid var(--border-green);border-radius:var(--radius-sm);padding:14px;text-align:center;margin-bottom:14px">
+          <div style="font-size:.75rem;color:var(--text-3);margin-bottom:6px">ROOM CODE</div>
+          <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green);letter-spacing:.1em">${code}</div>
         </div>
 
-        <div style="text-align:center;color:var(--text-3);font-size:.8rem;margin-bottom:12px">
-          Tell your friend to enter this code
-        </div>
+        <button onclick="copyCode('${code}')" style="width:100%;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:10px;font-weight:700;cursor:pointer;margin-bottom:10px;font-size:.85rem">
+          📋 Copy Code
+        </button>
 
-        <button onclick="cancelRoomWait()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);border-radius:var(--radius-sm);padding:10px;cursor:pointer">
+        <button onclick="cancelWait()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);border-radius:var(--radius-sm);padding:10px;cursor:pointer;font-size:.85rem">
           Cancel
         </button>
       </div>
@@ -596,44 +498,38 @@ window.createRoom = function() {
   document.body.insertAdjacentHTML('beforeend', html);
 };
 
-window.joinRoomPrompt = function() {
-  const code = prompt('Enter room code:').toUpperCase();
+window.joinMultiRoom = function() {
+  const code = prompt('Enter room code (e.g., ABC123):')?.toUpperCase();
   if (!code) return;
-  closeMultiplayer();
-
-  // Simulate joining
-  showToast('⚡ Joined room ' + code);
-  setTimeout(() => {
-    startMultiplayerGame();
-  }, 1000);
+  closeMultiDialog();
+  showToast('⚡ Joining room ' + code + '...');
+  setTimeout(() => startMultiplayerGame(), 800);
 };
 
 window.copyCode = function(code) {
   navigator.clipboard.writeText(code);
-  showToast('✅ Code copied!');
+  showToast('✅ Code copied to clipboard!');
 };
 
-window.closeMultiplayer = function() {
+window.closeMultiDialog = function() {
   document.querySelectorAll('[style*="position:fixed"]').forEach(el => {
-    if (el.querySelector('button[onclick="closeMultiplayer"]') || el.querySelector('button[onclick="cancelRoomWait"]')) {
+    if (el.innerHTML.includes('Multiplayer') || el.innerHTML.includes('Waiting for')) {
       el.remove();
     }
   });
 };
 
-window.cancelRoomWait = function() {
+window.cancelWait = function() {
   window.currentRoomCode = null;
-  closeMultiplayer();
+  closeMultiDialog();
 };
 
 window.startMultiplayerGame = function() {
   document.getElementById('penaltyModeSelector').style.display = 'none';
   document.getElementById('penaltyGame').style.display = 'block';
-  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, isMultiplayer: true };
+  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0 };
   renderPenaltyUI();
-
-  // Show opponent player card
-  showToast('⚡ Opponent joined! You kick first');
+  showToast('⚽ Opponent joined! Shoot first');
 };
 
 // Tab switching
