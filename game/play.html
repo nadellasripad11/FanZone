@@ -82,6 +82,37 @@
     .kick-dot { width:28px;height:28px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem; }
     .kick-dot.goal { background:rgba(204,255,0,.2);border-color:var(--border-green); }
     .kick-dot.saved { background:var(--red-dim);border-color:rgba(255,68,68,.4); }
+
+    /* Sign in dialog */
+    .signin-dialog { display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center; }
+    .signin-dialog.show { display:flex; }
+    .signin-dialog__content { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:300px;text-align:center; }
+    .signin-dialog__title { font-family:var(--font-display);font-size:1.3rem;font-weight:900;margin-bottom:12px; }
+    .signin-dialog__text { font-size:.9rem;color:var(--text-2);margin-bottom:20px;line-height:1.5; }
+    .signin-dialog__buttons { display:flex;gap:10px;flex-direction:column; }
+
+    /* Multiplayer mode selector */
+    .mp-mode-selector { display:none;padding:0 16px;margin-bottom:20px; }
+    .mp-mode-selector.show { display:block; }
+    .mode-selector-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    .mode-btn { background:var(--bg-2);border:2px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;text-align:center; }
+    .mode-btn:hover { border-color:var(--border-green);transform:translateY(-2px); }
+    .mode-btn__icon { font-size:2.5rem;margin-bottom:10px; }
+    .mode-btn__text { font-size:.85rem;font-weight:700;color:var(--text-1); }
+    .mode-btn__sub { font-size:.7rem;color:var(--text-3);margin-top:4px; }
+
+    /* Custom lobby screen */
+    .mp-custom-lobby { display:none;padding:0 16px;margin-bottom:20px; }
+    .mp-custom-lobby.show { display:block; }
+    .lobby-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px; }
+    .lobby-card__title { font-family:var(--font-display);font-size:1.1rem;font-weight:900;margin-bottom:14px;text-align:center; }
+    .lobby-option { margin-bottom:14px; }
+    .lobby-option:last-child { margin-bottom:0; }
+    .lobby-option__label { font-size:.75rem;text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:8px;display:block; }
+    .room-code { font-family:monospace;font-size:1.4rem;font-weight:900;color:var(--green);text-align:center;letter-spacing:4px;padding:12px;background:rgba(204,255,0,.1);border:1px solid var(--border-green);border-radius:var(--radius-sm);margin-bottom:10px; }
+    .code-input { width:100%;padding:12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-1);font-size:1rem;font-family:monospace;text-transform:uppercase;margin-bottom:10px; }
+    .code-input::placeholder { color:var(--text-3); }
+    .lobby-action-btns { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
   </style>
 </head>
 <body>
@@ -182,6 +213,73 @@
       <button class="btn btn--ghost" style="padding:8px 14px;font-size:.75rem" onclick="showToast('Challenge sent!')">Rematch</button>
     </div>`).join('')}
   </div>
+</div>
+
+<!-- SIGN IN DIALOG -->
+<div id="signinDialog" class="signin-dialog">
+  <div class="signin-dialog__content">
+    <div class="signin-dialog__title">🔐 Sign In Required</div>
+    <div class="signin-dialog__text">You need to be signed in to play multiplayer games.</div>
+    <div class="signin-dialog__buttons">
+      <button class="btn btn--primary" onclick="redirectToSignIn()">✓ Sign In</button>
+      <button class="btn btn--ghost" onclick="closeSigninDialog()">✕ Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MULTIPLAYER MODE SELECTOR -->
+<div id="mpModeSelector" class="mp-mode-selector">
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:8px">⚡🥅 Multiplayer Penalty</div>
+    <div style="font-size:.85rem;color:var(--text-3)">How do you want to play?</div>
+  </div>
+  <div class="mode-selector-grid">
+    <div class="mode-btn" onclick="startRandomMatch()">
+      <div class="mode-btn__icon">🎲</div>
+      <div class="mode-btn__text">Random Player</div>
+      <div class="mode-btn__sub">Auto-match</div>
+    </div>
+    <div class="mode-btn" onclick="showCustomLobby()">
+      <div class="mode-btn__icon">🔗</div>
+      <div class="mode-btn__text">Custom Lobby</div>
+      <div class="mode-btn__sub">Room codes</div>
+    </div>
+  </div>
+  <button class="btn btn--ghost btn--full" style="margin-top:14px" onclick="closeMultiplayerMode()">✕ Back</button>
+</div>
+
+<!-- CUSTOM LOBBY SCREEN -->
+<div id="mpCustomLobby" class="mp-custom-lobby">
+  <div class="lobby-card">
+    <div class="lobby-card__title">🔗 Custom Lobby</div>
+
+    <!-- Create Room -->
+    <div class="lobby-option">
+      <label class="lobby-option__label">📝 Create a Room</label>
+      <button class="btn btn--primary btn--full" onclick="createMpRoom()">Create Room & Get Code</button>
+    </div>
+
+    <!-- Room Code Display (hidden until created) -->
+    <div id="mpRoomCodeDisplay" style="display:none;margin-bottom:14px">
+      <label class="lobby-option__label">✓ Your Room Code</label>
+      <div class="room-code" id="mpRoomCode">LOADING</div>
+      <div style="font-size:.75rem;color:var(--text-3);text-align:center;margin-bottom:10px">Share this code with your friend</div>
+      <button class="btn btn--secondary btn--full" onclick="copyRoomCode()" style="background:var(--bg-3);border:1px solid var(--border)" id="copyBtn">📋 Copy Code</button>
+      <div style="font-size:.7rem;color:var(--text-3);text-align:center;margin-top:8px" id="mpWaitingText">⏳ Waiting for opponent to join...</div>
+    </div>
+
+    <!-- Divider -->
+    <div style="border-top:1px solid var(--border);margin:16px 0"></div>
+
+    <!-- Join Room -->
+    <div class="lobby-option">
+      <label class="lobby-option__label">🔓 Join a Room</label>
+      <input type="text" class="code-input" id="joinCodeInput" placeholder="Enter room code" maxlength="6">
+      <button class="btn btn--primary btn--full" onclick="joinMpRoom()">Join Room</button>
+    </div>
+  </div>
+
+  <button class="btn btn--ghost btn--full" onclick="backToModeSelector()">✕ Back</button>
 </div>
 
 <!-- MULTIPLAYER PENALTY GAME -->
@@ -439,21 +537,56 @@ function endPenalty() {
 }
 
 // ── MULTIPLAYER PENALTY GAME (Firebase Realtime) ──
-let mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[] };
+let mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[], roomCode:null };
 let mpUnsubscribe = null;
 let mpCheckInterval = null;
 
+// ── SIGN IN DIALOG ──
 function startMultiplayerPenalty() {
-  if (!FZ.user) { showToast('⚠️ Please sign in to play'); return; }
+  if (!FZ.user) {
+    document.getElementById('signinDialog').classList.add('show');
+    return;
+  }
+  showMpModeSelector();
+}
+
+function showSigninDialog() {
+  document.getElementById('signinDialog').classList.add('show');
+}
+
+function closeSigninDialog() {
+  document.getElementById('signinDialog').classList.remove('show');
+}
+
+function redirectToSignIn() {
+  window.location.href = 'index.html#auth';
+}
+
+// ── MULTIPLAYER MODE SELECTOR ──
+function showMpModeSelector() {
+  document.getElementById('tab-modes').style.display = 'none';
+  document.getElementById('mpModeSelector').classList.add('show');
+  document.getElementById('mpCustomLobby').classList.remove('show');
+}
+
+function closeMultiplayerMode() {
+  document.getElementById('mpModeSelector').classList.remove('show');
+  document.getElementById('mpCustomLobby').classList.remove('show');
+  document.getElementById('tab-modes').style.display = 'block';
+}
+
+// ── RANDOM MATCH ──
+function startRandomMatch() {
+  if (!FZ.user) return;
   if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
 
-  showToast('🔄 Connecting to a player...');
+  showToast('🔄 Finding opponent...');
 
   const gameId = 'mp_' + Math.random().toString(36).substr(2,9);
   const uid = FZ.user.uid;
   const name = FZ.user.displayName || 'Player';
 
-  mpState = { gameId, uid, role: null, myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [] };
+  mpState = { gameId, uid, role: null, myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [], roomCode: null };
 
   // Try to find an open game room
   const gamesRef = window.mpDbRef(window.mpDb, 'mp_games');
@@ -462,7 +595,7 @@ function startMultiplayerPenalty() {
     let foundRoom = null;
 
     for (let gid in games) {
-      if (games[gid].status === 'waiting' && games[gid].players.host.uid !== uid) {
+      if (games[gid].status === 'waiting' && games[gid].players.host.uid !== uid && !games[gid].roomCode) {
         foundRoom = gid;
         break;
       }
@@ -472,13 +605,14 @@ function startMultiplayerPenalty() {
       // Join existing game
       mpState.gameId = foundRoom;
       mpState.role = 'keeper';
-      joinMpGame(foundRoom, uid, name);
+      joinMpGameAuto(foundRoom, uid, name);
     } else {
       // Create new game room
       mpState.role = 'taker';
       const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
       window.mpDbSet(gameRef, {
         gameId,
+        roomCode: null,
         status: 'waiting',
         createdAt: Date.now(),
         players: {
@@ -496,8 +630,9 @@ function startMultiplayerPenalty() {
           document.getElementById('mpOppName').textContent = game.players.guest.name + ' (Goalkeeper)';
           showToast('✅ Opponent joined!');
           renderMpGame();
+          document.getElementById('mpModeSelector').classList.remove('show');
+          document.getElementById('mpCustomLobby').classList.remove('show');
           document.getElementById('mpPenaltyGame').style.display = 'block';
-          document.getElementById('tab-modes').style.display = 'none';
           listenToMpGame(gameId);
         }
       });
@@ -505,7 +640,129 @@ function startMultiplayerPenalty() {
   }, { onlyOnce: true });
 }
 
-function joinMpGame(gameId, uid, name) {
+// ── CUSTOM LOBBY (ROOM CODES) ──
+function showCustomLobby() {
+  document.getElementById('mpModeSelector').classList.remove('show');
+  document.getElementById('mpCustomLobby').classList.add('show');
+}
+
+function backToModeSelector() {
+  document.getElementById('mpCustomLobby').classList.remove('show');
+  document.getElementById('mpModeSelector').classList.add('show');
+  // Clear code display
+  document.getElementById('mpRoomCodeDisplay').style.display = 'none';
+  document.getElementById('mpRoomCode').textContent = 'LOADING';
+}
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+function createMpRoom() {
+  if (!FZ.user) return;
+  if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
+
+  const roomCode = generateRoomCode();
+  const gameId = 'mp_' + roomCode.toLowerCase() + '_' + Date.now();
+  const uid = FZ.user.uid;
+  const name = FZ.user.displayName || 'Player';
+
+  mpState = { gameId, uid, role: 'taker', myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [], roomCode };
+
+  const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
+  window.mpDbSet(gameRef, {
+    gameId,
+    roomCode,
+    status: 'waiting',
+    createdAt: Date.now(),
+    players: {
+      host: { uid, name, role: 'taker', zone: null, score: 0 },
+      guest: null
+    },
+    kicks: 0,
+    history: []
+  });
+
+  // Display code
+  document.getElementById('mpRoomCode').textContent = roomCode;
+  document.getElementById('mpRoomCodeDisplay').style.display = 'block';
+
+  // Wait for opponent
+  window.mpDbOnValue(gameRef, snapshot => {
+    const game = snapshot.val();
+    if (game && game.players.guest) {
+      document.getElementById('mpOppName').textContent = game.players.guest.name + ' (Goalkeeper)';
+      showToast('✅ Opponent joined!');
+      renderMpGame();
+      document.getElementById('mpModeSelector').classList.remove('show');
+      document.getElementById('mpCustomLobby').classList.remove('show');
+      document.getElementById('mpPenaltyGame').style.display = 'block';
+      listenToMpGame(gameId);
+    }
+  });
+}
+
+function copyRoomCode() {
+  const code = document.getElementById('mpRoomCode').textContent;
+  navigator.clipboard.writeText(code);
+  showToast('✓ Code copied!');
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = '✓ Copied!';
+  setTimeout(() => { btn.textContent = '📋 Copy Code'; }, 2000);
+}
+
+function joinMpRoom() {
+  const code = document.getElementById('joinCodeInput').value.toUpperCase().trim();
+  if (!code || code.length !== 6) { showToast('⚠️ Enter a valid 6-character code'); return; }
+
+  if (!FZ.user) return;
+  if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
+
+  // Find room by code
+  const gamesRef = window.mpDbRef(window.mpDb, 'mp_games');
+  window.mpDbOnValue(gamesRef, snapshot => {
+    const games = snapshot.val() || {};
+    let foundGameId = null;
+
+    for (let gid in games) {
+      if (games[gid].roomCode === code && games[gid].status === 'waiting') {
+        foundGameId = gid;
+        break;
+      }
+    }
+
+    if (!foundGameId) {
+      showToast('⚠️ Room not found or game already started');
+      return;
+    }
+
+    // Join the room
+    const uid = FZ.user.uid;
+    const name = FZ.user.displayName || 'Player';
+
+    mpState = { gameId: foundGameId, uid, role: 'keeper', myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [], roomCode: code };
+
+    const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + foundGameId);
+    window.mpDbUpdate(gameRef, {
+      status: 'active',
+      'players/guest': { uid, name, role: 'keeper', zone: null, score: 0 }
+    });
+
+    renderMpGame();
+    document.getElementById('mpModeSelector').classList.remove('show');
+    document.getElementById('mpCustomLobby').classList.remove('show');
+    document.getElementById('mpPenaltyGame').style.display = 'block';
+    showToast('✅ Joined room!');
+    listenToMpGame(foundGameId);
+  }, { onlyOnce: true });
+}
+
+function joinMpGameAuto(gameId, uid, name) {
   const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
   window.mpDbUpdate(gameRef, {
     status: 'active',
@@ -514,7 +771,7 @@ function joinMpGame(gameId, uid, name) {
 
   renderMpGame();
   document.getElementById('mpPenaltyGame').style.display = 'block';
-  document.getElementById('tab-modes').style.display = 'none';
+  document.getElementById('mpModeSelector').classList.remove('show');
   document.getElementById('mpOppName').textContent = 'Waiting...';
   listenToMpGame(gameId);
 }
@@ -686,8 +943,12 @@ function closeMpPenalty() {
   }
 
   document.getElementById('mpPenaltyGame').style.display = 'none';
+  document.getElementById('mpModeSelector').classList.remove('show');
+  document.getElementById('mpCustomLobby').classList.remove('show');
+  document.getElementById('mpRoomCodeDisplay').style.display = 'none';
   document.getElementById('tab-modes').style.display = 'block';
-  mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[] };
+  document.getElementById('joinCodeInput').value = '';
+  mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[], roomCode:null };
 }
 
 function endMpGame() {
