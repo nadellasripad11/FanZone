@@ -282,6 +282,16 @@ function nextStep() {
   if (step === 4) {
     FZ.saveProfile({ country: selections.country, team: selections.team, username: selections.username, interests: selections.interests });
     FZ.addXP(100);
+
+    // Check and apply referral code
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      FZ.applyReferral(refCode);
+      // Clear the URL parameter
+      window.history.replaceState({}, document.title, 'index.html');
+    }
+
     FZ.markOnboarded();
     window.location.href = 'home.html';
     return;

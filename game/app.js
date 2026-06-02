@@ -59,6 +59,60 @@ window.FZ = {
   markOnboarded() {
     if (this.user) localStorage.setItem('fz_onboarded_' + this.user.uid, '1');
     else localStorage.setItem('fz_guest_onboarded', '1');
+  },
+
+  generateReferralCode() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  },
+
+  getReferralCode() {
+    if (!this.user) return null;
+    let profile = this.getProfile();
+    if (!profile) profile = {};
+
+    // Generate if doesn't exist
+    if (!profile.referralCode) {
+      profile.referralCode = this.generateReferralCode();
+      this.saveProfile(profile);
+    }
+    return profile.referralCode;
+  },
+
+  getInviteUrl() {
+    const code = this.getReferralCode();
+    if (!code) return null;
+    const base = window.location.origin;
+    return base + '/game/?ref=' + code;
+  },
+
+  applyReferral(referralCode) {
+    if (!this.user) return;
+    const stats = this.getStats();
+    // Check if already claimed
+    if (stats.referralApplied) return false;
+
+    stats.referralApplied = true;
+    stats.xp += 200;
+    this.saveStats(stats);
+    return true;
+  },
+
+  checkAndApplyReferral() {
+    if (!this.user) return null;
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref');
+
+    if (refCode && this.applyReferral(refCode)) {
+      // Clear the URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return refCode;
+    }
+    return null;
   }
 };
 

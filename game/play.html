@@ -113,6 +113,11 @@
     .code-input { width:100%;padding:12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-1);font-size:1rem;font-family:monospace;text-transform:uppercase;margin-bottom:10px; }
     .code-input::placeholder { color:var(--text-3); }
     .lobby-action-btns { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+
+    /* Invite popup */
+    .invite-popup { position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:999; }
+    .invite-popup__content { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:320px;text-align:center;animation:slideUp .3s ease; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
 <body>
@@ -202,7 +207,8 @@
     <div style="font-size:3rem;margin-bottom:12px">👥</div>
     <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Invite Friends</div>
     <div style="font-size:.82rem;color:var(--text-2);line-height:1.6;margin-bottom:16px">Challenge friends to prediction battles. Get +200 XP when a friend joins FanZone!</div>
-    <button class="btn btn--primary btn--full" onclick="showToast('📋 Invite link copied!')">🔗 Copy Invite Link</button>
+    <div id="inviteUrlDisplay" style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:.75rem;color:var(--text-3);word-break:break-all;font-family:monospace;display:none"></div>
+    <button class="btn btn--primary btn--full" onclick="copyInviteLink()">🔗 Copy Invite Link</button>
   </div>
   <div style="margin-top:14px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
     <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Recent Challengers</div>
@@ -1017,6 +1023,73 @@ function switchPlayTab(tab, btn) {
 }
 
 function showComingSoon() { showToast('🚀 Coming soon — stay tuned!'); }
+
+// ── INVITE FRIENDS ──
+function copyInviteLink() {
+  const url = FZ.getInviteUrl();
+  if (!url) { showToast('⚠️ Please sign in first'); return; }
+
+  navigator.clipboard.writeText(url).then(() => {
+    document.getElementById('inviteUrlDisplay').textContent = url;
+    document.getElementById('inviteUrlDisplay').style.display = 'block';
+    showToast('✓ Invite link copied!');
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '🔗 Copy Invite Link'; }, 2000);
+  });
+}
+
+function showInvitePopup() {
+  if (!FZ.user) return;
+  // Check if already shown today
+  const lastShown = localStorage.getItem('fz_invite_popup_' + new Date().toDateString());
+  if (lastShown) return;
+
+  // Show popup
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:999';
+  modal.innerHTML = `
+    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:320px;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
+      <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-bottom:8px">Invite Friends</div>
+      <div style="font-size:.85rem;color:var(--text-2);line-height:1.6;margin-bottom:16px">Get <span style="color:var(--green);font-weight:700">+200 XP</span> when a friend joins using your link!</div>
+      <div style="display:flex;gap:10px;flex-direction:column">
+        <button onclick="copyInviteLinkFromPopup()" style="background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:12px;font-weight:700;cursor:pointer">🔗 Copy Invite Link</button>
+        <button onclick="this.closest('div').parentElement.remove()" style="background:var(--bg-3);color:var(--text-1);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-weight:700;cursor:pointer">Later</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // Mark as shown today
+  localStorage.setItem('fz_invite_popup_' + new Date().toDateString(), '1');
+}
+
+function copyInviteLinkFromPopup() {
+  const url = FZ.getInviteUrl();
+  if (!url) { showToast('⚠️ Please sign in first'); return; }
+
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('✓ Invite link copied!');
+    document.querySelector('[onclick="this.closest(\'div\').parentElement.remove()"]').closest('div').parentElement.remove();
+  });
+}
+
+// Check for referral code on load
+if (FZ.user) {
+  const appliedRef = FZ.checkAndApplyReferral();
+  if (appliedRef) {
+    showToast('✅ Referral bonus: +200 XP!');
+    document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+  }
+}
+
+// Show invite popup after a short delay
+setTimeout(() => {
+  if (FZ.user) {
+    showInvitePopup();
+  }
+}, 1500);
 
 initQuiz();
 </script>
