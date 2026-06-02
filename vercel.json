@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "echo 'Static files only'",
+  "outputDirectory": ".",
+  "public": true,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/game$", "destination": "/game/index.html" },
+    { "source": "/game/", "destination": "/game/index.html" }
+  ],
+  "redirects": [
+    { "source": "/game", "destination": "/game/", "permanent": true }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=3600" }
+      ]
+    }
+  ]
+}
