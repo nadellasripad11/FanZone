@@ -330,7 +330,29 @@ function toggleInterest(label) {
 // ── AUTH FLOWS ──
 window.continueAsGuest = function() {
   FZ.user = null;
-  startOnboarding();
+  FZ.markOnboarded();
+
+  // Show YouTube subscribe prompt for guests
+  const html = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;animation:fadeIn .3s">
+      <div style="background:linear-gradient(135deg,#000 0%,#1a1a1a 100%);border:1px solid #ff0000;border-radius:var(--radius);padding:24px;max-width:340px;width:100%;text-align:center;animation:slideUp .4s">
+        <div style="font-size:3rem;margin-bottom:12px">🎥</div>
+        <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:8px">Subscribe to RESSI</div>
+        <div style="font-size:.9rem;color:#aaa;margin-bottom:16px;line-height:1.6">
+          Get exclusive clips, behind-the-scenes content, and live reactions. Don't miss out!
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <a href="https://www.youtube.com/@RESSI-u3n" target="_blank" rel="noopener noreferrer" style="background:#ff0000;color:#fff;border:none;padding:12px;border-radius:6px;font-weight:700;text-decoration:none;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:6px" onclick="setTimeout(()=>window.location.href='home.html',1500)">
+            📺 Subscribe Now
+          </a>
+          <button onclick="window.location.href='home.html'" style="background:transparent;border:1px solid #444;color:#aaa;padding:12px;border-radius:6px;font-weight:700;cursor:pointer;font-size:.9rem">Skip</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+  setTimeout(() => window.location.href = 'home.html', 6000);
 };
 
 window.startEmailFlow = function() {

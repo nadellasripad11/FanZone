@@ -265,7 +265,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getDatabase, ref, onValue, push, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { getDatabase, ref, onValue, push, update, remove, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
@@ -335,6 +335,16 @@ window.postReaction = async function(emoji, type) {
     document.getElementById('userReactionCount').textContent = userStats.reactions;
 
     showToast(emoji + ' Reaction posted!');
+
+    // Update challenges and streak
+    FZ.updateChallenge('reactions', 1);
+    const streak = FZ.updateStreak();
+    if (streak > 1 && streak % 5 === 0) {
+      FZ.sendNotification('🔥 ' + streak + '-day Streak!', {
+        body: 'Keep it up! You\'re on fire!',
+        tag: 'streak'
+      });
+    }
   } catch(e) {
     console.error('Reaction post failed:', e);
     showToast('⚠️ Failed to post reaction');
@@ -453,6 +463,9 @@ window.shoot = function(zone) {
         document.getElementById('penResult').textContent = '⚽ GOAL!';
         document.getElementById('penResult').className = 'penalty-result goal';
         keeper.style.animation = 'shake .2s';
+
+        // Update challenges
+        FZ.updateChallenge('goals', 1);
       } else {
         document.getElementById('penResult').textContent = '🧤 SAVED!';
         document.getElementById('penResult').className = 'penalty-result saved';
@@ -461,6 +474,12 @@ window.shoot = function(zone) {
 
       window.penaltyState.kicks++;
       document.getElementById('penYou').textContent = window.penaltyState.playerScore;
+
+      // Sync score to Firebase if multiplayer
+      if (window.penaltyState.isMultiplayer && window.currentGameRef) {
+        const path = window.penaltyState.isHost ? 'players/host/score' : 'players/guest/score';
+        update(window.currentGameRef, { [path]: window.penaltyState.playerScore });
+      }
 
       if (window.penaltyState.kicks >= 5) {
         setTimeout(endPenalty, 1000);
@@ -549,6 +568,19 @@ window.createMultiRoom = function(code) {
   window.currentRoomCode = code;
   closeMultiDialog();
 
+  // Create room in Firebase
+  const gamesRef = ref(db, 'mp_games/' + code);
+  const profile = FZ.getProfile();
+  set(gamesRef, {
+    status: 'waiting',
+    players: {
+      host: { uid: window.authUser.uid, name: profile.username, score: 0 },
+      guest: null
+    },
+    roomCode: code,
+    createdAt: Date.now()
+  });
+
   const html = `
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px">
       <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:300px;width:100%">
@@ -563,6 +595,8 @@ window.createMultiRoom = function(code) {
           📋 Copy Code
         </button>
 
+        <div id="roomStatus" style="font-size:.8rem;color:var(--green);text-align:center;margin-bottom:10px">Listening for opponent...</div>
+
         <button onclick="cancelWait()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);border-radius:var(--radius-sm);padding:10px;cursor:pointer;font-size:.85rem">
           Cancel
         </button>
@@ -570,14 +604,36 @@ window.createMultiRoom = function(code) {
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', html);
+
+  // Listen for opponent joining
+  const roomRef = ref(db, 'mp_games/' + code);
+  onValue(roomRef, snap => {
+    const room = snap.val();
+    if (room?.players?.guest) {
+      closeMultiDialog();
+      startMultiplayerGame(code, true); // true = host
+    }
+  });
 };
 
 window.joinMultiRoom = function() {
   const code = prompt('Enter room code (e.g., ABC123):')?.toUpperCase();
   if (!code) return;
+
   closeMultiDialog();
-  showToast('⚡ Joining room ' + code + '...');
-  setTimeout(() => startMultiplayerGame(), 800);
+  const profile = FZ.getProfile();
+  const gamesRef = ref(db, 'mp_games/' + code);
+
+  // Join as guest
+  update(gamesRef, {
+    'players/guest': { uid: window.authUser.uid, name: profile.username, score: 0 },
+    'status': 'active'
+  }).then(() => {
+    showToast('⚡ Joined room ' + code);
+    setTimeout(() => startMultiplayerGame(code, false), 500); // false = guest
+  }).catch(e => {
+    showToast('❌ Room not found!');
+  });
 };
 
 window.copyCode = function(code) {
@@ -595,15 +651,41 @@ window.closeMultiDialog = function() {
 
 window.cancelWait = function() {
   window.currentRoomCode = null;
+  if (window.currentGameRef) {
+    remove(window.currentGameRef).catch(e => console.log('cleanup ok'));
+  }
   closeMultiDialog();
 };
 
-window.startMultiplayerGame = function() {
+window.startMultiplayerGame = function(code, isHost) {
   document.getElementById('penaltyModeSelector').style.display = 'none';
   document.getElementById('penaltyGame').style.display = 'block';
-  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0 };
+
+  window.penaltyState = {
+    kicks: 0,
+    playerScore: 0,
+    keeperScore: 0,
+    isMultiplayer: true,
+    isHost: isHost,
+    roomCode: code
+  };
+
+  // Listen to opponent's shots
+  const gameRef = ref(db, 'mp_games/' + code);
+  window.currentGameRef = gameRef;
+
+  onValue(gameRef, snap => {
+    const room = snap.val();
+    if (room) {
+      const opponent = isHost ? room.players.guest : room.players.host;
+      if (opponent) {
+        document.getElementById('penKeeper').textContent = opponent.score || '0';
+      }
+    }
+  });
+
   renderPenaltyUI();
-  showToast('⚽ Opponent joined! Shoot first');
+  showToast(isHost ? '⚽ Opponent joined! You kick first' : '⚽ Connected! Waiting for host');
 };
 
 // Tab switching

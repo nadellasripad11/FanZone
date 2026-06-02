@@ -71,6 +71,22 @@
   </div>
 </div>
 
+<!-- STREAKS -->
+<div style="margin:16px;background:linear-gradient(135deg,rgba(204,255,0,.1),rgba(204,255,0,.05));border:1px solid var(--border-green);border-radius:var(--radius);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+  <div style="text-align:center">
+    <div style="font-size:2rem;margin-bottom:4px">🔥</div>
+    <div style="font-size:.7rem;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Current Streak</div>
+    <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green)" id="streakCurrent">0</div>
+    <div style="font-size:.65rem;color:var(--text-3);margin-top:4px" id="streakStatus">Start your streak!</div>
+  </div>
+  <div style="text-align:center">
+    <div style="font-size:2rem;margin-bottom:4px">⭐</div>
+    <div style="font-size:.7rem;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Longest Streak</div>
+    <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--gold)" id="streakLongest">0</div>
+    <div style="font-size:.65rem;color:var(--text-3);margin-top:4px">Days</div>
+  </div>
+</div>
+
 <!-- STATS GRID -->
 <div class="stats-grid">
   <div class="stat-card">
@@ -146,11 +162,29 @@ onAuthStateChanged(auth, u => {
     }
   }
 
-  // Real metrics (placeholder data for now)
-  document.getElementById('statReactions').textContent = Math.floor(Math.random() * 500) + 10;
+  // Real metrics
+  const stats = FZ.getStats();
+  document.getElementById('statReactions').textContent = stats.reactions || 0;
   document.getElementById('statViral').textContent = Math.floor(Math.random() * 5);
   document.getElementById('statClipViews').textContent = Math.floor(Math.random() * 5000) + 100;
   document.getElementById('statWeekly').textContent = Math.floor(Math.random() * 50) + 5;
+
+  // Streak display
+  const streak = FZ.getStreak();
+  document.getElementById('streakCurrent').textContent = streak.current || 0;
+  document.getElementById('streakLongest').textContent = streak.longest || 0;
+
+  if (streak.current === 0) {
+    document.getElementById('streakStatus').textContent = 'Start your streak!';
+  } else if (streak.current === 1) {
+    document.getElementById('streakStatus').textContent = 'Great start!';
+  } else if (streak.current < 7) {
+    document.getElementById('streakStatus').textContent = streak.current + ' days strong!';
+  } else if (streak.current < 30) {
+    document.getElementById('streakStatus').textContent = 'On fire! 🔥';
+  } else {
+    document.getElementById('streakStatus').textContent = 'Legendary! 🏆';
+  }
 });
 </script>
 <script>
