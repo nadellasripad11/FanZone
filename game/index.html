@@ -39,9 +39,13 @@
 
     /* Country grid */
     .country-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .country-search { width:100%;padding:12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-1);font-size:.9rem;margin-bottom:12px; }
+    .country-search::placeholder { color:var(--text-3); }
+    .country-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;max-height:400px;overflow-y:auto;padding-right:4px; }
     .country-item { background:var(--bg-3); border:2px solid var(--border); border-radius:var(--radius-sm); padding:14px 8px; text-align:center; cursor:pointer; transition:all .18s; }
     .country-item:hover { border-color:var(--border-green); }
     .country-item.selected { border-color:var(--green); background:var(--green-dim); }
+    .country-item.hidden { display:none; }
     .country-item__flag { font-size:2rem; line-height:1; margin-bottom:6px; }
     .country-item__name { font-size:.7rem; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.04em; }
     .country-item.selected .country-item__name { color:var(--green); }
@@ -160,11 +164,7 @@ let selections = { country: null, team: null, username: '', interests: [], photo
 let isSignUp = true;
 
 const COUNTRIES = [
-  {flag:'🇧🇷',name:'Brazil'},{flag:'🇦🇷',name:'Argentina'},{flag:'🇫🇷',name:'France'},
-  {flag:'🇩🇪',name:'Germany'},{flag:'🇵🇹',name:'Portugal'},{flag:'🇪🇸',name:'Spain'},
-  {flag:'🇬🇧',name:'England'},{flag:'🇺🇸',name:'USA'},{flag:'🇯🇵',name:'Japan'},
-  {flag:'🇲🇽',name:'Mexico'},{flag:'🇳🇱',name:'Netherlands'},{flag:'🇺🇾',name:'Uruguay'},
-  {flag:'🇨🇴',name:'Colombia'},{flag:'🇨🇷',name:'Costa Rica'},{flag:'🇸🇳',name:'Senegal'},
+  {flag:'🇦🇫',name:'Afghanistan'},{flag:'🇦🇱',name:'Albania'},{flag:'🇩🇿',name:'Algeria'},{flag:'🇦🇩',name:'Andorra'},{flag:'🇦🇴',name:'Angola'},{flag:'🇦🇮',name:'Anguilla'},{flag:'🇦🇬',name:'Antigua & Barbuda'},{flag:'🇦🇷',name:'Argentina'},{flag:'🇦🇿',name:'Azerbaijan'},{flag:'🇧🇸',name:'Bahamas'},{flag:'🇧🇭',name:'Bahrain'},{flag:'🇧🇩',name:'Bangladesh'},{flag:'🇧🇧',name:'Barbados'},{flag:'🇧🇪',name:'Belgium'},{flag:'🇧🇿',name:'Belize'},{flag:'🇧🇯',name:'Benin'},{flag:'🇧🇲',name:'Bermuda'},{flag:'🇧🇹',name:'Bhutan'},{flag:'🇧🇴',name:'Bolivia'},{flag:'🇧🇦',name:'Bosnia & Herzegovina'},{flag:'🇧🇼',name:'Botswana'},{flag:'🇧🇷',name:'Brazil'},{flag:'🇧🇳',name:'Brunei'},{flag:'🇧🇬',name:'Bulgaria'},{flag:'🇧🇫',name:'Burkina Faso'},{flag:'🇧🇮',name:'Burundi'},{flag:'🇰🇭',name:'Cambodia'},{flag:'🇨🇲',name:'Cameroon'},{flag:'🇨🇦',name:'Canada'},{flag:'🇨🇻',name:'Cape Verde'},{flag:'🇰🇾',name:'Cayman Islands'},{flag:'🇨🇫',name:'Central African Republic'},{flag:'🇹🇩',name:'Chad'},{flag:'🇨🇱',name:'Chile'},{flag:'🇨🇳',name:'China'},{flag:'🇨🇴',name:'Colombia'},{flag:'🇰🇲',name:'Comoros'},{flag:'🇨🇬',name:'Congo'},{flag:'🇨🇷',name:'Costa Rica'},{flag:'🇭🇷',name:'Croatia'},{flag:'🇨🇺',name:'Cuba'},{flag:'🇨🇾',name:'Cyprus'},{flag:'🇨🇿',name:'Czech Republic'},{flag:'🇩🇰',name:'Denmark'},{flag:'🇩🇯',name:'Djibouti'},{flag:'🇩🇴',name:'Dominican Republic'},{flag:'🇪🇨',name:'Ecuador'},{flag:'🇪🇬',name:'Egypt'},{flag:'🇸🇻',name:'El Salvador'},{flag:'🇬🇶',name:'Equatorial Guinea'},{flag:'🇪🇷',name:'Eritrea'},{flag:'🇪🇪',name:'Estonia'},{flag:'🇸🇿',name:'Eswatini'},{flag:'🇪🇹',name:'Ethiopia'},{flag:'🇫🇯',name:'Fiji'},{flag:'🇫🇮',name:'Finland'},{flag:'🇫🇷',name:'France'},{flag:'🇬🇦',name:'Gabon'},{flag:'🇬🇲',name:'Gambia'},{flag:'🇬🇪',name:'Georgia'},{flag:'🇩🇪',name:'Germany'},{flag:'🇬🇭',name:'Ghana'},{flag:'🇬🇮',name:'Gibraltar'},{flag:'🇬🇷',name:'Greece'},{flag:'🇬🇩',name:'Grenada'},{flag:'🇬🇺',name:'Guam'},{flag:'🇬🇹',name:'Guatemala'},{flag:'🇬🇬',name:'Guernsey'},{flag:'🇬🇳',name:'Guinea'},{flag:'🇬🇼',name:'Guinea-Bissau'},{flag:'🇬🇾',name:'Guyana'},{flag:'🇭🇹',name:'Haiti'},{flag:'🇭🇳',name:'Honduras'},{flag:'🇭🇰',name:'Hong Kong'},{flag:'🇭🇺',name:'Hungary'},{flag:'🇮🇸',name:'Iceland'},{flag:'🇮🇳',name:'India'},{flag:'🇮🇩',name:'Indonesia'},{flag:'🇮🇷',name:'Iran'},{flag:'🇮🇶',name:'Iraq'},{flag:'🇮🇪',name:'Ireland'},{flag:'🇮🇲',name:'Isle of Man'},{flag:'🇮🇱',name:'Israel'},{flag:'🇮🇹',name:'Italy'},{flag:'🇨🇮',name:'Ivory Coast'},{flag:'🇯🇲',name:'Jamaica'},{flag:'🇯🇵',name:'Japan'},{flag:'🇯🇪',name:'Jersey'},{flag:'🇯🇴',name:'Jordan'},{flag:'🇰🇿',name:'Kazakhstan'},{flag:'🇰🇪',name:'Kenya'},{flag:'🇰🇵',name:'North Korea'},{flag:'🇰🇷',name:'South Korea'},{flag:'🇰🇼',name:'Kuwait'},{flag:'🇰🇬',name:'Kyrgyzstan'},{flag:'🇱🇦',name:'Laos'},{flag:'🇱🇻',name:'Latvia'},{flag:'🇱🇧',name:'Lebanon'},{flag:'🇱🇸',name:'Lesotho'},{flag:'🇱🇷',name:'Liberia'},{flag:'🇱🇾',name:'Libya'},{flag:'🇱🇮',name:'Liechtenstein'},{flag:'🇱🇹',name:'Lithuania'},{flag:'🇱🇺',name:'Luxembourg'},{flag:'🇲🇴',name:'Macau'},{flag:'🇲🇬',name:'Madagascar'},{flag:'🇲🇼',name:'Malawi'},{flag:'🇲🇾',name:'Malaysia'},{flag:'🇲🇻',name:'Maldives'},{flag:'🇲🇱',name:'Mali'},{flag:'🇲🇹',name:'Malta'},{flag:'🇲🇭',name:'Marshall Islands'},{flag:'🇲🇶',name:'Martinique'},{flag:'🇲🇷',name:'Mauritania'},{flag:'🇲🇺',name:'Mauritius'},{flag:'🇲🇽',name:'Mexico'},{flag:'🇫🇲',name:'Micronesia'},{flag:'🇲🇩',name:'Moldova'},{flag:'🇲🇨',name:'Monaco'},{flag:'🇲🇳',name:'Mongolia'},{flag:'🇲🇪',name:'Montenegro'},{flag:'🇲🇦',name:'Morocco'},{flag:'🇲🇿',name:'Mozambique'},{flag:'🇲🇲',name:'Myanmar'},{flag:'🇳🇦',name:'Namibia'},{flag:'🇳🇷',name:'Nauru'},{flag:'🇳🇵',name:'Nepal'},{flag:'🇳🇱',name:'Netherlands'},{flag:'🇳🇨',name:'New Caledonia'},{flag:'🇳🇿',name:'New Zealand'},{flag:'🇳🇮',name:'Nicaragua'},{flag:'🇳🇪',name:'Niger'},{flag:'🇳🇬',name:'Nigeria'},{flag:'🇲🇿',name:'North Macedonia'},{flag:'🇳🇴',name:'Norway'},{flag:'🇴🇲',name:'Oman'},{flag:'🇵🇰',name:'Pakistan'},{flag:'🇵🇼',name:'Palau'},{flag:'🇵🇦',name:'Panama'},{flag:'🇵🇬',name:'Papua New Guinea'},{flag:'🇵🇾',name:'Paraguay'},{flag:'🇵🇪',name:'Peru'},{flag:'🇵🇭',name:'Philippines'},{flag:'🇵🇱',name:'Poland'},{flag:'🇵🇹',name:'Portugal'},{flag:'🇶🇦',name:'Qatar'},{flag:'🇷🇪',name:'Reunion'},{flag:'🇷🇴',name:'Romania'},{flag:'🇷🇺',name:'Russia'},{flag:'🇷🇼',name:'Rwanda'},{flag:'🇰🇳',name:'Saint Kitts & Nevis'},{flag:'🇱🇨',name:'Saint Lucia'},{flag:'🇻🇨',name:'Saint Vincent & Grenadines'},{flag:'🇼🇸',name:'Samoa'},{flag:'🇸🇲',name:'San Marino'},{flag:'🇸🇹',name:'São Tomé & Príncipe'},{flag:'🇸🇦',name:'Saudi Arabia'},{flag:'🇸🇳',name:'Senegal'},{flag:'🇷🇸',name:'Serbia'},{flag:'🇸🇨',name:'Seychelles'},{flag:'🇸🇱',name:'Sierra Leone'},{flag:'🇸🇬',name:'Singapore'},{flag:'🇸🇰',name:'Slovakia'},{flag:'🇸🇮',name:'Slovenia'},{flag:'🇸🇧',name:'Solomon Islands'},{flag:'🇸🇴',name:'Somalia'},{flag:'🇿🇦',name:'South Africa'},{flag:'🇸🇸',name:'South Sudan'},{flag:'🇪🇸',name:'Spain'},{flag:'🇱🇰',name:'Sri Lanka'},{flag:'🇸🇩',name:'Sudan'},{flag:'🇸🇷',name:'Suriname'},{flag:'🇸🇪',name:'Sweden'},{flag:'🇨🇭',name:'Switzerland'},{flag:'🇸🇾',name:'Syria'},{flag:'🇹🇼',name:'Taiwan'},{flag:'🇹🇯',name:'Tajikistan'},{flag:'🇹🇿',name:'Tanzania'},{flag:'🇹🇭',name:'Thailand'},{flag:'🇹🇱',name:'Timor-Leste'},{flag:'🇹🇬',name:'Togo'},{flag:'🇹🇴',name:'Tonga'},{flag:'🇹🇹',name:'Trinidad & Tobago'},{flag:'🇹🇳',name:'Tunisia'},{flag:'🇹🇷',name:'Turkey'},{flag:'🇹🇲',name:'Turkmenistan'},{flag:'🇹🇻',name:'Turks & Caicos'},{flag:'🇹🇻',name:'Tuvalu'},{flag:'🇺🇬',name:'Uganda'},{flag:'🇺🇦',name:'Ukraine'},{flag:'🇦🇪',name:'United Arab Emirates'},{flag:'🇬🇧',name:'England'},{flag:'🇺🇸',name:'USA'},{flag:'🇺🇾',name:'Uruguay'},{flag:'🇺🇿',name:'Uzbekistan'},{flag:'🇻🇺',name:'Vanuatu'},{flag:'🇻🇦',name:'Vatican City'},{flag:'🇻🇪',name:'Venezuela'},{flag:'🇻🇳',name:'Vietnam'},{flag:'🇻🇬',name:'Virgin Islands'},{flag:'🇾🇪',name:'Yemen'},{flag:'🇿🇲',name:'Zambia'},{flag:'🇿🇼',name:'Zimbabwe'},{flag:'🌍',name:'Other'},
 ];
 
 const TEAMS = [
@@ -206,12 +206,16 @@ function renderStep() {
     body.innerHTML = `
       <div class="onboard-title">Choose Your Country</div>
       <div class="onboard-sub">Where are you watching from?</div>
+      <input type="text" class="country-search" id="countrySearch" placeholder="Search countries..." oninput="filterCountries()">
       <div class="country-grid" id="countryGrid">
-        ${COUNTRIES.map(c => `<div class="country-item${selections.country===c.name?' selected':''}" onclick="selectCountry('${c.name}')">
+        ${COUNTRIES.map(c => `<div class="country-item${selections.country===c.name?' selected':''}" onclick="selectCountry('${c.name}')" data-country="${c.name.toLowerCase()}">
           <div class="country-item__flag">${c.flag}</div>
           <div class="country-item__name">${c.name}</div>
         </div>`).join('')}
       </div>`;
+    setTimeout(() => {
+      document.getElementById('countrySearch').focus();
+    }, 100);
   } else if (step === 1) {
     body.innerHTML = `
       <div class="onboard-title">Choose Your Favorite Team</div>
@@ -308,6 +312,15 @@ function selectCountry(name) {
   selections.country = name;
   document.querySelectorAll('.country-item').forEach(el => {
     el.classList.toggle('selected', el.querySelector('.country-item__name').textContent === name);
+  });
+}
+
+function filterCountries() {
+  const search = document.getElementById('countrySearch').value.toLowerCase().trim();
+  document.querySelectorAll('.country-item').forEach(el => {
+    const countryName = el.getAttribute('data-country');
+    const matches = !search || countryName.includes(search);
+    el.classList.toggle('hidden', !matches);
   });
 }
 
