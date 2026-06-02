@@ -54,7 +54,6 @@
 
 <div class="page-top">
   <div class="page-top__title">👤 Profile</div>
-  <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
 </div>
 
 <!-- PROFILE HERO -->
@@ -65,72 +64,49 @@
       <div class="profile-hero__name" id="profileName">FanZone Fan</div>
       <div class="profile-hero__handle" id="profileHandle">@fan · 🏳️</div>
       <div class="profile-hero__badges">
-        <span class="badge badge--green">Elite Predictor</span>
-        <span class="badge badge--gold">🔥 18 Streak</span>
+        <span class="badge badge--green">🎬 Live Reactor</span>
       </div>
     </div>
     <div class="edit-btn" onclick="showToast('✏️ Edit profile coming soon!')">✏️</div>
   </div>
-  <div class="level-row">
-    <div class="level-label">Level <span id="levelNum">7</span> — <span id="levelTitle">Pro Fan</span></div>
-    <div class="level-val" id="xpTotal">0 XP</div>
-  </div>
-  <div class="xp-row">
-    <span id="xpNext">Next level: 1,200 XP</span>
-    <span id="xpPct">0%</span>
-  </div>
-  <div class="progress"><div class="progress__fill" id="xpBar" style="width:0%"></div></div>
 </div>
 
 <!-- STATS GRID -->
 <div class="stats-grid">
   <div class="stat-card">
-    <div class="stat-card__val" style="color:var(--green)" id="statPredictions">0</div>
-    <div class="stat-card__label">Predictions</div>
+    <div class="stat-card__val" style="color:var(--green)" id="statReactions">0</div>
+    <div class="stat-card__label">Reactions</div>
   </div>
   <div class="stat-card">
-    <div class="stat-card__val" style="color:var(--blue)" id="statAccuracy">68%</div>
-    <div class="stat-card__label">Accuracy</div>
+    <div class="stat-card__val" style="color:var(--purple)" id="statViral">0</div>
+    <div class="stat-card__label">Viral</div>
   </div>
   <div class="stat-card">
-    <div class="stat-card__val" style="color:var(--red)" id="statStreak">0</div>
-    <div class="stat-card__label">Streak</div>
+    <div class="stat-card__val" style="color:var(--gold)" id="statClipViews">0</div>
+    <div class="stat-card__label">Clip Views</div>
   </div>
   <div class="stat-card">
-    <div class="stat-card__val" style="color:var(--gold)" id="statRank">#42</div>
-    <div class="stat-card__label">Global Rank</div>
+    <div class="stat-card__val" style="color:var(--blue)" id="statWeekly">0</div>
+    <div class="stat-card__label">This Week</div>
   </div>
 </div>
 
 <!-- TABS -->
 <div style="padding:0 16px 16px">
   <div class="tabs">
-    <button class="tab active" onclick="switchProfileTab('badges',this)">Badges</button>
+    <button class="tab active" onclick="switchProfileTab('clips',this)">Top Clips</button>
     <button class="tab" onclick="switchProfileTab('activity',this)">Activity</button>
-    <button class="tab" onclick="switchProfileTab('stats',this)">Stats</button>
   </div>
 </div>
 
-<!-- BADGES TAB -->
-<div id="ptab-badges">
-  <div class="badges-grid" id="badgesGrid"></div>
+<!-- CLIPS TAB -->
+<div id="ptab-clips" style="padding:0 16px">
+  <div style="color:var(--text-3);font-size:.9rem;text-align:center;padding:20px">🎬 Your clips will appear here<br/>Join live rooms and react to start creating content</div>
 </div>
 
 <!-- ACTIVITY TAB -->
 <div id="ptab-activity" style="display:none;padding:0 16px">
   <div id="activityEl"></div>
-</div>
-
-<!-- STATS TAB -->
-<div id="ptab-stats" style="display:none;padding:0 16px">
-  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px">
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Performance This Month</div>
-    <div style="display:flex;flex-direction:column;gap:12px" id="perfStats"></div>
-  </div>
-  <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:12px">Prediction Breakdown</div>
-    <div id="predBreakdown" style="display:flex;flex-direction:column;gap:8px"></div>
-  </div>
 </div>
 
 <div style="height:12px"></div>
@@ -145,9 +121,7 @@
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <a href="home.html" class="nav-item" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
-  <a href="clash.html" class="nav-item" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
-  <a href="predict.html" class="nav-item" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
-  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">⚡</div><div class="nav-item__label">React</div></a>
   <a href="profile.html" class="nav-item active" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
 </nav>
 
@@ -161,12 +135,7 @@ window._auth = auth;
 window._signOut = () => fbSignOut(auth);
 onAuthStateChanged(auth, u => {
   FZ.user = u;
-  const stats = FZ.getStats();
   const profile = FZ.getProfile();
-  const xp = stats.xp || 0;
-
-  // Header XP pill
-  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(xp) + ' XP';
 
   // Profile card
   if (u) {
@@ -177,24 +146,11 @@ onAuthStateChanged(auth, u => {
     }
   }
 
-  // XP / Level
-  const level = Math.floor(xp / 500) + 1;
-  const LEVEL_TITLES = ['Rookie','Fan','Enthusiast','Supporter','Fanatic','Expert','Pro Fan','Legend','Elite','GOAT'];
-  const levelTitle = LEVEL_TITLES[Math.min(level-1, LEVEL_TITLES.length-1)];
-  const xpThisLevel = xp % 500;
-  const xpPct = Math.min(100, Math.round(xpThisLevel / 500 * 100));
-  document.getElementById('levelNum').textContent = level;
-  document.getElementById('levelTitle').textContent = levelTitle;
-  document.getElementById('xpTotal').textContent = formatXP(xp) + ' XP';
-  document.getElementById('xpNext').textContent = 'Next level: ' + (500 - xpThisLevel) + ' XP';
-  document.getElementById('xpPct').textContent = xpPct + '%';
-  document.getElementById('xpBar').style.width = xpPct + '%';
-
-  // Stats
-  document.getElementById('statPredictions').textContent = stats.predictions || Math.floor(xp/80) || 0;
-  document.getElementById('statAccuracy').textContent = (stats.accuracy || 68) + '%';
-  document.getElementById('statStreak').textContent = stats.streak || 0;
-  document.getElementById('statRank').textContent = '#' + Math.max(1, 500 - Math.floor(xp/20));
+  // Real metrics (placeholder data for now)
+  document.getElementById('statReactions').textContent = Math.floor(Math.random() * 500) + 10;
+  document.getElementById('statViral').textContent = Math.floor(Math.random() * 5);
+  document.getElementById('statClipViews').textContent = Math.floor(Math.random() * 5000) + 100;
+  document.getElementById('statWeekly').textContent = Math.floor(Math.random() * 50) + 5;
 });
 </script>
 <script>
@@ -214,71 +170,33 @@ const BADGES = [
 ];
 
 const ACTIVITY = [
-  { icon:'🎯', title:'Predicted Brazil 2-1 Germany', sub:'2 hours ago', xp:'+400 XP' },
-  { icon:'⚔️', title:'Voted in "Messi vs Ronaldo" clash', sub:'3 hours ago', xp:'+25 XP' },
-  { icon:'⚽', title:'Penalty shootout — 4/5 goals', sub:'Yesterday', xp:'+400 XP' },
-  { icon:'🎯', title:'Predicted France 1-0 Portugal', sub:'Yesterday', xp:'+150 XP' },
-  { icon:'❤️', title:'Liked 3 posts on Home Feed', sub:'2 days ago', xp:'+15 XP' },
-  { icon:'💬', title:'Joined Clash chat discussion', sub:'2 days ago', xp:'+10 XP' },
-  { icon:'🔥', title:'7-day prediction streak!', sub:'3 days ago', xp:'+500 XP' },
+  { icon:'😍', title:'Reacted to Brazil goal', sub:'2 hours ago' },
+  { icon:'⚡', title:'Joined live room with 45K fans', sub:'3 hours ago' },
+  { icon:'🎬', title:'Featured in trending clip', sub:'Yesterday', highlight:true },
+  { icon:'😂', title:'Shared reaction on Instagram', sub:'Yesterday' },
+  { icon:'🔥', title:'Joined live penalty shootout', sub:'2 days ago' },
+  { icon:'👀', title:'Got 892 likes on reaction', sub:'2 days ago', highlight:true },
 ];
-
-const PERF_STATS = [
-  { label:'Win predictions', val:72, color:'var(--green)' },
-  { label:'Score predictions', val:28, color:'var(--blue)' },
-  { label:'First scorer', val:15, color:'var(--gold)' },
-];
-
-const PRED_BREAKDOWN = [
-  { label:'✅ Correct', count:'124', color:'var(--green)' },
-  { label:'❌ Wrong', count:'48', color:'var(--red)' },
-  { label:'⏳ Pending', count:'12', color:'var(--text-3)' },
-];
-
-function renderBadges() {
-  document.getElementById('badgesGrid').innerHTML = BADGES.map(b=>`
-    <div class="badge-card ${b.earned?'earned':'locked'}" title="${b.name}">
-      <div class="badge-card__icon">${b.icon}</div>
-      <div class="badge-card__name">${b.name}</div>
-    </div>`).join('');
-}
 
 function renderActivity() {
   document.getElementById('activityEl').innerHTML = ACTIVITY.map(a=>`
-    <div class="activity-item">
+    <div class="activity-item" style="${a.highlight?'border-color:var(--border-green);':''}">
       <div class="activity-icon">${a.icon}</div>
       <div class="activity-text">
         <div class="activity-title">${a.title}</div>
         <div class="activity-sub">${a.sub}</div>
       </div>
-      <div class="activity-xp">${a.xp}</div>
-    </div>`).join('');
-}
-
-function renderPerfStats() {
-  document.getElementById('perfStats').innerHTML = PERF_STATS.map(s=>`
-    <div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.8rem">
-        <span>${s.label}</span>
-        <span style="font-weight:700;color:${s.color}">${s.val}%</span>
-      </div>
-      <div class="progress"><div class="progress__fill" style="width:${s.val}%;background:${s.color}"></div></div>
-    </div>`).join('');
-  document.getElementById('predBreakdown').innerHTML = PRED_BREAKDOWN.map(p=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:.85rem">${p.label}</span>
-      <span style="font-family:var(--font-display);font-size:1.1rem;font-weight:900;color:${p.color}">${p.count}</span>
     </div>`).join('');
 }
 
 function switchProfileTab(tab, btn) {
-  ['badges','activity','stats'].forEach(t=>{
-    document.getElementById('ptab-'+t).style.display = t===tab?'block':'none';
+  ['clips','activity'].forEach(t=>{
+    const el = document.getElementById('ptab-'+t);
+    if (el) el.style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if (tab==='activity') renderActivity();
-  if (tab==='stats') renderPerfStats();
 }
 
 function signOut() {
@@ -289,7 +207,7 @@ function signOut() {
   }
 }
 
-renderBadges();
+renderActivity();
 </script>
 </body>
 </html>

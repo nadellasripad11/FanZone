@@ -50,10 +50,7 @@
 
 <div class="page-top">
   <div class="page-top__logo"><div class="page-top__logo-icon">★</div>FAN<span>ZONE</span></div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <span class="xp-pill" id="xpPill">⚡ 0 XP</span>
-    <div class="icon-btn" id="profileBtn" onclick="location.href='profile.html'">😎</div>
-  </div>
+  <div class="icon-btn" id="profileBtn" onclick="location.href='profile.html'">😎</div>
 </div>
 
 <!-- HERO LIVE MATCH -->
@@ -70,16 +67,15 @@
       <div class="hero-team"><div class="hero-team__flag" id="heroAwayFlag">🇦🇷</div><div class="hero-team__name" id="heroAwayName">Argentina</div></div>
     </div>
     <div class="hero-match__actions">
-      <a href="predict.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">🎯 Predict</a>
-      <a href="predict.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">💬 Live Chat</a>
-      <a href="play.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">🎮 Play</a>
+      <a href="play.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">⚡ Join Live Room</a>
+      <a href="play.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">🎮 Play Penalty</a>
     </div>
   </div>
 </div>
 
-<!-- LIVE NOW -->
+<!-- LIVE ROOMS -->
 <div style="margin-bottom:16px">
-  <div class="section-header"><div class="section-title">Live Now</div><div class="see-all">See All</div></div>
+  <div class="section-header"><div class="section-title">🔴 Live Rooms</div><div class="see-all">See All</div></div>
   <div class="live-scroll" id="liveScrollEl">
     <div class="mini-match live"><div class="mini-match__teams">🇫🇷 vs 🇩🇪</div><div class="mini-match__score" style="color:var(--text-1)">1 — 0</div><div style="display:flex;align-items:center;gap:4px;margin-top:4px"><div class="live-dot"></div><span style="font-size:.68rem;color:var(--red)">54'</span></div></div>
     <div class="mini-match live"><div class="mini-match__teams">🇵🇹 vs 🇺🇾</div><div class="mini-match__score" style="color:var(--text-1)">0 — 0</div><div style="display:flex;align-items:center;gap:4px;margin-top:4px"><div class="live-dot"></div><span style="font-size:.68rem;color:var(--red)">38'</span></div></div>
@@ -89,25 +85,28 @@
   </div>
 </div>
 
-<!-- FEED TABS -->
-<div class="feed-tabs">
-  <div class="tabs">
-    <button class="tab active" onclick="switchFeedTab('foryou',this)">For You</button>
-    <button class="tab" onclick="switchFeedTab('trending',this)">Trending</button>
-    <button class="tab" onclick="switchFeedTab('following',this)">Following</button>
+<!-- TRENDING CLIPS -->
+<div style="margin-bottom:16px">
+  <div class="section-header"><div class="section-title">🎬 Trending Clips</div><div class="see-all">See All</div></div>
+  <div class="clips-grid" id="clipsEl" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px">
+    <!-- Clips will be rendered here -->
   </div>
 </div>
 
-<!-- FEED -->
-<div class="feed" id="feedEl"></div>
+<!-- UPCOMING MATCHES -->
+<div style="margin-bottom:16px">
+  <div class="section-header"><div class="section-title">📅 Upcoming Matches</div><div class="see-all">See All</div></div>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:0 16px" id="upcomingEl">
+    <!-- Upcoming matches will be rendered here -->
+  </div>
+</div>
+
 <div style="height:16px"></div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <a href="home.html" class="nav-item active" data-page="home"><div class="nav-item__icon">🏠</div><div class="nav-item__label">Home</div></a>
-  <a href="clash.html" class="nav-item" data-page="clash"><div class="nav-item__icon">⚔️</div><div class="nav-item__label">Clash</div></a>
-  <a href="predict.html" class="nav-item" data-page="predict"><div class="nav-item__icon">🎯</div><div class="nav-item__label">Predict</div></a>
-  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">🎮</div><div class="nav-item__label">Play</div></a>
+  <a href="play.html" class="nav-item" data-page="play"><div class="nav-item__icon">⚡</div><div class="nav-item__label">React</div></a>
   <a href="profile.html" class="nav-item" data-page="profile"><div class="nav-item__icon">👤</div><div class="nav-item__label">Profile</div></a>
 </nav>
 
@@ -119,8 +118,6 @@ const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
 onAuthStateChanged(auth, u => {
   FZ.user = u;
-  const stats = FZ.getStats();
-  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(stats.xp) + ' XP';
   const profile = FZ.getProfile();
   if (u?.photoURL) {
     const btn = document.getElementById('profileBtn');
@@ -129,56 +126,56 @@ onAuthStateChanged(auth, u => {
 });
 </script>
 <script>
-const POSTS = [
-  { user:'TheFootballKing', flag:'🇧🇷', emoji:'🏅', time:'2m ago', badge:'Elite Predictor', text:'WHAT A GOAL! 🔥🔥 Vinicius just put Brazil ahead! #WorldCup', likes:12400, comments:856, shares:2100, hasImg:true, imgEmoji:'⚽' },
-  { user:'PredictWizard', flag:'🇦🇷', emoji:'🧠', time:'5m ago', badge:'Tactical Genius', text:"I told you Brazil would win! 🏆💛 Called it 3 days ago. Who else had Brazil in the final?", likes:8700, comments:1240, shares:890 },
-  { user:'FootballOracle', flag:'🇩🇪', emoji:'👑', time:'8m ago', badge:null, text:'Argentina pressing high but Brazil counter-attack is absolutely lethal today. Tactical masterclass from Brazil. 🧠', likes:5400, comments:620, shares:340 },
-  { user:'GoalGuru', flag:'🇫🇷', emoji:'⭐', time:'12m ago', badge:'World Cup Prophet', text:"Messi had one of the greatest World Cup runs ever. What a legend. 🐐 #GOAT", likes:24600, comments:4100, shares:8900, hasImg:true, imgEmoji:'🐐' },
-  { user:'TacticsTalk', flag:'🇬🇧', emoji:'🎯', time:'18m ago', badge:null, text:"The penalty shootout drama never gets old. 🫀 Heart racing every single time.", likes:3200, comments:280, shares:190 },
+const TRENDING_CLIPS = [
+  { user:'Reaction_King', flag:'🇧🇷', emoji:'🎬', moment:'Vinicius Goal', views:245000, duration:'0:15', icon:'⚽' },
+  { user:'FanClips', flag:'🇦🇷', emoji:'🎥', moment:'Penalty Save', views:189000, duration:'0:14', icon:'🧤' },
+  { user:'GoalVibes', flag:'🇩🇪', emoji:'📹', moment:'Own Goal Drama', views:412000, duration:'0:15', icon:'😱' },
+  { user:'WorldCupMoments', flag:'🇫🇷', emoji:'🎞️', moment:'Red Card Reaction', views:567000, duration:'0:15', icon:'🔴' },
+  { user:'FootballFury', flag:'🇬🇧', emoji:'🎬', moment:'Late Goal', views:321000, duration:'0:15', icon:'🎯' },
+  { user:'ClipMaster', flag:'🇪🇸', emoji:'🎥', moment:'Crazy Celebration', views:198000, duration:'0:15', icon:'🎉' },
 ];
 
-function renderFeed(posts) {
-  document.getElementById('feedEl').innerHTML = posts.map((p,i) => `
-    <div class="post">
-      <div class="post__header">
-        <div class="avatar avatar--sm">${p.emoji}</div>
-        <div style="flex:1">
-          <div class="post__name">${p.user} ${p.flag} ${p.badge?`<span class="badge badge--green" style="font-size:.62rem">${p.badge}</span>`:''}</div>
-          <div class="post__meta">${p.time}</div>
-        </div>
-        <div style="font-size:1.1rem;color:var(--text-3);cursor:pointer">•••</div>
+function renderTrendingClips() {
+  const clipsEl = document.getElementById('clipsEl');
+  clipsEl.innerHTML = TRENDING_CLIPS.map((c,i) => `
+    <div onclick="location.href='play.html'" style="cursor:pointer;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:border-color .18s">
+      <div style="aspect-ratio:9/16;background:linear-gradient(135deg,rgba(204,255,0,.1),rgba(204,255,0,.04));display:flex;align-items:center;justify-content:center;font-size:3rem;border-bottom:1px solid var(--border)">
+        ${c.icon}
       </div>
-      <div class="post__text">${p.text}</div>
-      ${p.hasImg?(p.imgUrl?`<img src="${p.imgUrl}" class="post__image" loading="lazy" onerror="this.style.display='none'" style="font-size:0">`:`<div class="post__image">${p.imgEmoji||'⚽'}</div>`):''}
-      <div class="post__actions">
-        <button class="post-action" onclick="likePost(this,${i})" data-liked="false">❤️ ${formatCount(p.likes)}</button>
-        <button class="post-action">💬 ${formatCount(p.comments)}</button>
-        <button class="post-action">↗️ ${formatCount(p.shares)}</button>
+      <div style="padding:10px;font-size:.75rem">
+        <div style="font-weight:700;color:var(--text-1)">${c.moment}</div>
+        <div style="color:var(--text-3);margin-top:2px">${c.user}</div>
+        <div style="color:var(--green);margin-top:4px;font-weight:600">👁 ${(c.views/1000).toFixed(0)}K views</div>
       </div>
     </div>`).join('');
 }
 
-function likePost(btn, idx) {
-  const liked = btn.dataset.liked === 'true';
-  btn.dataset.liked = !liked;
-  btn.classList.toggle('liked', !liked);
-  const n = parseInt(POSTS[idx].likes) + (liked ? -1 : 1);
-  btn.textContent = (liked?'❤️':'❤️') + ' ' + formatCount(n);
-  if (!liked) FZ.addXP(5);
+function renderUpcomingMatches() {
+  const upEl = document.getElementById('upcomingEl');
+  const upcoming = [
+    { home:'🇧🇷', away:'🇦🇷', time:'in 2h', comp:'Final' },
+    { home:'🇫🇷', away:'🇩🇪', time:'in 5h', comp:'Semis' },
+    { home:'🇬🇧', away:'🇪🇸', time:'Tomorrow', comp:'QF' },
+  ];
+  upEl.innerHTML = upcoming.map(m => `
+    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:1.8rem">${m.home}</span>
+        <span style="color:var(--text-3);font-size:.8rem">vs</span>
+        <span style="font-size:1.8rem">${m.away}</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:600;color:var(--green);font-size:.85rem">${m.time}</div>
+        <div style="color:var(--text-3);font-size:.7rem">${m.comp}</div>
+      </div>
+    </div>`).join('');
 }
 
 function formatCount(n) { return n>=1000?(n/1000).toFixed(1).replace('.0','')+'K':n; }
-function switchFeedTab(tab, btn) {
-  document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderFeed(tab==='trending' ? [...POSTS].sort(()=>Math.random()-.5) : POSTS);
-}
 
-// Flicker watching count
-setInterval(()=>{
-  const n = 128000 + Math.floor((Math.random()-.5)*2000);
-  document.getElementById('watchCount').textContent = (n/1000).toFixed(0)+'K';
-}, 3000);
+// Initial render
+renderTrendingClips();
+renderUpcomingMatches();
 
 // Fetch real match data from backend
 async function loadLiveMatch() {
@@ -206,9 +203,8 @@ async function loadLiveMatch() {
           <div class="hero-team"><div class="hero-team__flag">${getFlagEmoji(m.awayTeam.short)}</div><div class="hero-team__name">${m.awayTeam.short}</div></div>
         </div>
         <div class="hero-match__actions">
-          <a href="predict.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">🎯 Predict</a>
-          <a href="predict.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">💬 Live Chat</a>
-          <a href="play.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">🎮 Play</a>
+          <a href="play.html" class="btn btn--primary" style="font-size:.82rem;padding:10px">⚡ Join Live Room</a>
+          <a href="play.html" class="btn btn--ghost" style="font-size:.82rem;padding:10px">🎮 Play Penalty</a>
         </div>
       </div>
     `;
@@ -229,8 +225,6 @@ setInterval(()=>{
   const el = document.getElementById('watchCount');
   if (el) el.textContent = (n/1000).toFixed(0)+'K';
 }, 3000);
-
-renderFeed(POSTS);
 </script>
 </body>
 </html>
