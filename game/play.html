@@ -8,6 +8,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="app.css"/>
   <style>
+    .mp-penalty { padding:0 16px;margin-bottom:20px; }
+    .mp-players { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+    .mp-player { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center; }
+    .mp-player.you { border-color:var(--border-green); }
+    .mp-player__role { font-size:.65rem;color:var(--text-3);text-transform:uppercase;font-weight:700;margin-bottom:4px; }
+    .mp-player__score { font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green); }
+    .mp-player__name { font-size:.8rem;color:var(--text-2);margin-top:4px; }
+
+    /* Goal zones for both players */
+    .mp-goals { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+    .mp-goal-section { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px; }
+    .mp-goal-title { font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:700;margin-bottom:10px; }
+    .mp-goal-frame { width:100%;aspect-ratio:3/2;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);border-radius:4px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;padding:6px;margin-bottom:10px; }
+    .mp-zone { border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.2rem; }
+    .mp-zone:hover { background:rgba(204,255,0,.12);border-color:var(--border-green); }
+    .mp-zone.selected { background:rgba(204,255,0,.25);border-color:var(--green);box-shadow:0 0 12px rgba(204,255,0,.3); }
+    .mp-zone.hit { background:rgba(204,255,0,.3);border-color:var(--green); }
+    .mp-zone.saved { background:var(--red-dim);border-color:rgba(255,68,68,.5); }
+
+    .mp-status { font-size:.75rem;color:var(--text-3);text-align:center;margin-bottom:10px;min-height:20px; }
+    .mp-btn { width:100%;padding:10px;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:.8rem; }
+    .mp-btn:hover { background:#b8e600; }
+    .mp-btn:disabled { background:var(--text-3);cursor:not-allowed;opacity:.5; }
+    .mp-waiting { text-align:center;padding:20px;color:var(--text-3); }
+  </style>
+  <style>
     /* Mode grid */
     .mode-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px; }
     .mode-card { background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden; }
@@ -80,11 +106,17 @@
     <div class="section-title">Choose Your Mode</div>
   </div>
   <div class="mode-grid">
-    <div class="mode-card featured" onclick="startPenalty()">
+    <div class="mode-card featured" onclick="startMultiplayerPenalty()">
+      <div class="mode-card__xp">+100–500 XP</div>
+      <div class="mode-card__icon">⚡🥅</div>
+      <div class="mode-card__title">Multiplayer Penalty</div>
+      <div class="mode-card__sub">🔴 Live! Face off vs another player. One shoots, one saves!</div>
+    </div>
+    <div class="mode-card" onclick="startPenalty()">
       <div class="mode-card__xp">+50–500 XP</div>
       <div class="mode-card__icon">🥅</div>
-      <div class="mode-card__title">Penalty Shootout</div>
-      <div class="mode-card__sub">Take 5 penalties vs a virtual keeper. Score as many as you can!</div>
+      <div class="mode-card__title">Solo Penalty</div>
+      <div class="mode-card__sub">Take 5 penalties vs AI. Score as many as you can!</div>
     </div>
     <div class="mode-card" onclick="showComingSoon()">
       <div class="mode-card__badge">⚡ Live</div>
@@ -152,6 +184,74 @@
   </div>
 </div>
 
+<!-- MULTIPLAYER PENALTY GAME -->
+<div id="mpPenaltyGame" style="display:none">
+  <div class="mp-penalty">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:900;margin-bottom:8px">🥅 Multiplayer Penalty</div>
+      <div style="font-size:.85rem;color:var(--text-3)">Live face-off with another player</div>
+    </div>
+
+    <!-- Player Cards & Scores -->
+    <div class="mp-players">
+      <div class="mp-player you">
+        <div class="mp-player__role">You (Penalty Taker)</div>
+        <div class="mp-player__score" id="mpYouScore">0</div>
+        <div class="mp-player__name" id="mpYouName">Loading...</div>
+      </div>
+      <div class="mp-player">
+        <div class="mp-player__role">Opponent (Goalkeeper)</div>
+        <div class="mp-player__score" id="mpOppScore">0</div>
+        <div class="mp-player__name" id="mpOppName">Waiting...</div>
+      </div>
+    </div>
+
+    <!-- Goal Zones (Both Players) -->
+    <div class="mp-goals">
+      <!-- Penalty Taker's Choice -->
+      <div class="mp-goal-section">
+        <div class="mp-goal-title">Where to Shoot?</div>
+        <div class="mp-goal-frame" id="mpTakerFrame">
+          <div class="mp-zone" onclick="mpSelectZone(0,true)">↖</div>
+          <div class="mp-zone" onclick="mpSelectZone(1,true)">↑</div>
+          <div class="mp-zone" onclick="mpSelectZone(2,true)">↗</div>
+          <div class="mp-zone" onclick="mpSelectZone(3,true)">↙</div>
+          <div class="mp-zone" onclick="mpSelectZone(4,true)">↓</div>
+          <div class="mp-zone" onclick="mpSelectZone(5,true)">↘</div>
+        </div>
+        <div class="mp-status" id="mpTakerStatus">Choose where to shoot</div>
+        <button class="mp-btn" id="mpTakerBtn" onclick="mpShoot()" disabled>🎯 Shoot</button>
+      </div>
+
+      <!-- Goalkeeper's Choice -->
+      <div class="mp-goal-section">
+        <div class="mp-goal-title">Where to Dive?</div>
+        <div class="mp-goal-frame" id="mpKeeperFrame">
+          <div class="mp-zone" onclick="mpSelectZone(0,false)">↖</div>
+          <div class="mp-zone" onclick="mpSelectZone(1,false)">↑</div>
+          <div class="mp-zone" onclick="mpSelectZone(2,false)">↗</div>
+          <div class="mp-zone" onclick="mpSelectZone(3,false)">↙</div>
+          <div class="mp-zone" onclick="mpSelectZone(4,false)">↓</div>
+          <div class="mp-zone" onclick="mpSelectZone(5,false)">↘</div>
+        </div>
+        <div class="mp-status" id="mpKeeperStatus">Choose where to dive</div>
+        <button class="mp-btn" id="mpKeeperBtn" onclick="mpDive()" disabled>🧤 Dive</button>
+      </div>
+    </div>
+
+    <!-- Kick Progress -->
+    <div style="padding:0 16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:.85rem;color:var(--text-3);margin-bottom:10px">Kick <span id="mpKickNum">1</span> of 5</div>
+      <div class="kicks-row" id="mpKickDots"></div>
+      <div class="penalty-result" id="mpResult" style="margin-top:10px;min-height:30px"></div>
+    </div>
+
+    <div style="padding:0 16px">
+      <button class="btn btn--ghost btn--full" id="mpClose" onclick="closeMpPenalty()" style="display:none;margin-bottom:10px">✕ Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- PENALTY GAME OVERLAY -->
 <div id="penaltyGame">
   <div class="penalty-arena">
@@ -204,8 +304,17 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getDatabase, ref, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
 const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
+window.mpDb = getDatabase(app);
+window.mpDbRef = ref;
+window.mpDbOnValue = onValue;
+window.mpDbSet = set;
+window.mpDbUpdate = update;
+window.mpDbRemove = remove;
+
 onAuthStateChanged(auth, u => {
   FZ.user = u;
   const stats = FZ.getStats();
@@ -327,6 +436,273 @@ function endPenalty() {
     showToast('0/5 goals — try again!');
   }
   renderKickDots();
+}
+
+// ── MULTIPLAYER PENALTY GAME (Firebase Realtime) ──
+let mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[] };
+let mpUnsubscribe = null;
+let mpCheckInterval = null;
+
+function startMultiplayerPenalty() {
+  if (!FZ.user) { showToast('⚠️ Please sign in to play'); return; }
+  if (!window.mpDb) { showToast('⚠️ Database loading...'); return; }
+
+  showToast('🔄 Connecting to a player...');
+
+  const gameId = 'mp_' + Math.random().toString(36).substr(2,9);
+  const uid = FZ.user.uid;
+  const name = FZ.user.displayName || 'Player';
+
+  mpState = { gameId, uid, role: null, myZone: null, oppZone: null, myScore: 0, oppScore: 0, kick: 0, done: false, history: [] };
+
+  // Try to find an open game room
+  const gamesRef = window.mpDbRef(window.mpDb, 'mp_games');
+  window.mpDbOnValue(gamesRef, snapshot => {
+    const games = snapshot.val() || {};
+    let foundRoom = null;
+
+    for (let gid in games) {
+      if (games[gid].status === 'waiting' && games[gid].players.host.uid !== uid) {
+        foundRoom = gid;
+        break;
+      }
+    }
+
+    if (foundRoom) {
+      // Join existing game
+      mpState.gameId = foundRoom;
+      mpState.role = 'keeper';
+      joinMpGame(foundRoom, uid, name);
+    } else {
+      // Create new game room
+      mpState.role = 'taker';
+      const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
+      window.mpDbSet(gameRef, {
+        gameId,
+        status: 'waiting',
+        createdAt: Date.now(),
+        players: {
+          host: { uid, name, role: 'taker', zone: null, score: 0 },
+          guest: null
+        },
+        kicks: 0,
+        history: []
+      });
+
+      showToast('⏳ Waiting for opponent...');
+      window.mpDbOnValue(gameRef, snapshot => {
+        const game = snapshot.val();
+        if (game && game.players.guest) {
+          document.getElementById('mpOppName').textContent = game.players.guest.name + ' (Goalkeeper)';
+          showToast('✅ Opponent joined!');
+          renderMpGame();
+          document.getElementById('mpPenaltyGame').style.display = 'block';
+          document.getElementById('tab-modes').style.display = 'none';
+          listenToMpGame(gameId);
+        }
+      });
+    }
+  }, { onlyOnce: true });
+}
+
+function joinMpGame(gameId, uid, name) {
+  const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
+  window.mpDbUpdate(gameRef, {
+    status: 'active',
+    'players/guest': { uid, name, role: 'keeper', zone: null, score: 0 }
+  });
+
+  renderMpGame();
+  document.getElementById('mpPenaltyGame').style.display = 'block';
+  document.getElementById('tab-modes').style.display = 'none';
+  document.getElementById('mpOppName').textContent = 'Waiting...';
+  listenToMpGame(gameId);
+}
+
+function listenToMpGame(gameId) {
+  const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + gameId);
+
+  if (mpUnsubscribe) mpUnsubscribe();
+
+  mpUnsubscribe = window.mpDbOnValue(gameRef, snapshot => {
+    const game = snapshot.val();
+    if (!game) return;
+
+    const isHost = game.players.host.uid === FZ.user.uid;
+    const me = isHost ? game.players.host : game.players.guest;
+    const opp = isHost ? game.players.guest : game.players.host;
+
+    if (!me || !opp) return;
+
+    // Show opponent name
+    document.getElementById('mpOppName').textContent = (opp.name || 'Opponent') + (mpState.role === 'taker' ? ' 🧤' : ' 🎯');
+
+    mpState.myScore = me.score || 0;
+    mpState.oppScore = opp.score || 0;
+    mpState.kick = game.kicks || 0;
+    mpState.history = game.history || [];
+
+    document.getElementById('mpYouScore').textContent = mpState.myScore;
+    document.getElementById('mpOppScore').textContent = mpState.oppScore;
+    document.getElementById('mpKickNum').textContent = mpState.kick + 1;
+
+    // Check if both players have selected zones
+    if (me.zone !== null && opp.zone !== null && game.status === 'active') {
+      mpState.oppZone = opp.zone;
+      showMpRoundResult();
+    }
+
+    if (game.status === 'finished') {
+      endMpGame();
+    }
+  });
+}
+
+function mpSelectZone(z, isTaker) {
+  if (mpState.done || mpState.role === null) return;
+  if ((isTaker && mpState.role !== 'taker') || (!isTaker && mpState.role !== 'keeper')) return;
+
+  const frame = isTaker ? document.getElementById('mpTakerFrame') : document.getElementById('mpKeeperFrame');
+  frame.querySelectorAll('.mp-zone').forEach((el, i) => {
+    el.classList.toggle('selected', i === z);
+  });
+
+  mpState.myZone = z;
+  const btn = isTaker ? document.getElementById('mpTakerBtn') : document.getElementById('mpKeeperBtn');
+  if (btn) btn.disabled = false;
+}
+
+function mpShoot() {
+  if (mpState.myZone === null || mpState.role !== 'taker') return;
+
+  const playerRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId + '/players/host');
+  window.mpDbUpdate(playerRef, { zone: mpState.myZone });
+  document.getElementById('mpTakerBtn').disabled = true;
+}
+
+function mpDive() {
+  if (mpState.myZone === null || mpState.role !== 'keeper') return;
+
+  const playerRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId + '/players/guest');
+  window.mpDbUpdate(playerRef, { zone: mpState.myZone });
+  document.getElementById('mpKeeperBtn').disabled = true;
+}
+
+function showMpRoundResult() {
+  if (mpState.myZone === null || mpState.oppZone === null) return;
+
+  const goal = mpState.myZone !== mpState.oppZone;
+  const isGoal = (mpState.role === 'taker' && goal) || (mpState.role === 'keeper' && !goal);
+
+  if (isGoal) mpState.myScore++;
+  mpState.history.push(goal ? 'goal' : 'saved');
+  mpState.kick++;
+
+  const msg = goal ? '⚽ GOAL!' : '🧤 Saved!';
+  document.getElementById('mpResult').textContent = msg;
+  document.getElementById('mpResult').style.color = goal ? 'var(--green)' : 'var(--red)';
+
+  const takerZones = document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone');
+  const keeperZones = document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone');
+
+  if (mpState.role === 'taker') {
+    takerZones[mpState.myZone].classList.add('hit');
+    keeperZones[mpState.oppZone].classList.add('saved');
+  } else {
+    takerZones[mpState.oppZone].classList.add('hit');
+    keeperZones[mpState.myZone].classList.add('saved');
+  }
+
+  document.getElementById('mpYouScore').textContent = mpState.myScore;
+  disableMpInputs();
+
+  setTimeout(() => {
+    if (mpState.kick >= 5) {
+      endMpGame();
+    } else {
+      resetMpRound();
+    }
+  }, 2000);
+}
+
+function disableMpInputs() {
+  document.getElementById('mpTakerBtn').disabled = true;
+  document.getElementById('mpKeeperBtn').disabled = true;
+  document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'none');
+  document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'none');
+}
+
+function resetMpRound() {
+  mpState.myZone = null;
+  mpState.oppZone = null;
+  document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone').forEach(z => z.className = 'mp-zone');
+  document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone').forEach(z => z.className = 'mp-zone');
+  document.getElementById('mpTakerFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'auto');
+  document.getElementById('mpKeeperFrame').querySelectorAll('.mp-zone').forEach(z => z.style.pointerEvents = 'auto');
+  document.getElementById('mpTakerBtn').disabled = true;
+  document.getElementById('mpKeeperBtn').disabled = true;
+  document.getElementById('mpResult').textContent = '';
+  document.getElementById('mpKickNum').textContent = mpState.kick + 1;
+  renderMpKickDots();
+}
+
+function renderMpKickDots() {
+  const dots = document.getElementById('mpKickDots');
+  dots.innerHTML = Array.from({length:5},(_, i)=>{
+    const h = mpState.history[i];
+    return `<div class="kick-dot ${h==='goal'?'goal':h==='saved'?'saved':''}">${h==='goal'?'⚽':h==='saved'?'🧤':''}</div>`;
+  }).join('');
+}
+
+function renderMpGame() {
+  const name = FZ.user?.displayName || 'Player';
+  document.getElementById('mpYouName').textContent = name + (mpState.role==='taker'?' 🎯':' 🧤');
+  document.getElementById('mpYouScore').textContent = mpState.myScore;
+  document.getElementById('mpOppScore').textContent = mpState.oppScore;
+  document.getElementById('mpKickNum').textContent = mpState.kick + 1;
+
+  // Role-specific UI feedback
+  const sections = document.querySelectorAll('.mp-goal-section');
+  if (sections.length >= 2) {
+    if (mpState.role === 'taker') {
+      sections[0].style.opacity = '1';
+      sections[1].style.opacity = '0.5';
+      sections[1].style.pointerEvents = 'none';
+    } else {
+      sections[0].style.opacity = '0.5';
+      sections[1].style.opacity = '1';
+      sections[0].style.pointerEvents = 'none';
+    }
+  }
+}
+
+function closeMpPenalty() {
+  if (mpUnsubscribe) mpUnsubscribe();
+  if (mpCheckInterval) clearInterval(mpCheckInterval);
+
+  if (mpState.gameId && !mpState.done) {
+    const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId);
+    window.mpDbRemove(gameRef);
+  }
+
+  document.getElementById('mpPenaltyGame').style.display = 'none';
+  document.getElementById('tab-modes').style.display = 'block';
+  mpState = { gameId:null, uid:null, role:null, myZone:null, oppZone:null, myScore:0, oppScore:0, kick:0, done:false, history:[] };
+}
+
+function endMpGame() {
+  mpState.done = true;
+  const xp = mpState.myScore * 100;
+  FZ.addXP(xp);
+  document.getElementById('xpPill').textContent = '⚡ ' + formatXP(FZ.getStats().xp) + ' XP';
+  document.getElementById('mpResult').textContent = `Game Over! You scored ${mpState.myScore}/5 · +${xp} XP!`;
+  document.getElementById('mpClose').style.display = 'block';
+  showToast(`🏁 Game Over! ${mpState.myScore}/5 · +${xp} XP`);
+
+  if (mpState.gameId) {
+    const gameRef = window.mpDbRef(window.mpDb, 'mp_games/' + mpState.gameId);
+    window.mpDbUpdate(gameRef, { status: 'finished' });
+  }
 }
 
 // ── DAILY TRIVIA ──
