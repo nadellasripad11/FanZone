@@ -605,7 +605,7 @@ window.createPenaltyRoom = function(code) {
   window.penaltyCurrentRoom = code;
 };
 
-window.joinPenaltyRoom = function() {
+window.joinPenaltyRoom = async function() {
   const code = prompt('Enter room code (e.g., ABC123):')?.toUpperCase()?.trim();
   if (!code || code.length !== 6) {
     showToast('Invalid code format');
@@ -615,16 +615,24 @@ window.joinPenaltyRoom = function() {
   const profile = FZ.getProfile();
   const gamesRef = ref(db, 'penalty_rooms/' + code);
 
-  set(gamesRef, {
-    status: 'active',
-    host: { uid: (await get(gamesRef)).val()?.host?.uid },
-    guest: { uid: window.authUser.uid, name: profile.username, score: 0 }
-  }).then(() => {
+  try {
+    const roomData = await get(gamesRef);
+    if (!roomData.exists()) {
+      showToast('❌ Room not found!');
+      return;
+    }
+
+    await update(gamesRef, {
+      'guest': { uid: window.authUser.uid, name: profile.username, score: 0 },
+      'status': 'active'
+    });
+
     showToast('✅ Joined penalty room!');
-    startPenaltyGame(code, false);
-  }).catch(e => {
-    showToast('❌ Room not found!');
-  });
+    await startPenaltyGame(code, false);
+  } catch (e) {
+    showToast('❌ Error joining room!');
+    console.error(e);
+  }
 };
 
 window.closePenaltyDialog = function() {
