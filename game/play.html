@@ -314,7 +314,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getDatabase, ref, onValue, push, update, remove, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { getDatabase, ref, onValue, push, update, remove, set, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
@@ -375,15 +375,19 @@ window.postReaction = async function(emoji, type) {
 
   try {
     const reactionsRef = ref(db, 'live_reactions/latest');
-    await push(reactionsRef, reaction);
 
-    // Update user's reaction count
+    // Use retry logic for posting reaction
+    await window.firebaseRetry(async () => {
+      return push(reactionsRef, reaction);
+    });
+
+    // Update user's reaction count (local)
     const userStats = FZ.getStats();
     userStats.reactions = (userStats.reactions || 0) + 1;
     FZ.saveStats(userStats);
     document.getElementById('userReactionCount').textContent = userStats.reactions;
 
-    showToast(emoji + ' Reaction posted!');
+    showToast(emoji + ' Posted!');
 
     // Update challenges and streak
     FZ.updateChallenge('reactions', 1);
@@ -396,7 +400,11 @@ window.postReaction = async function(emoji, type) {
     }
   } catch(e) {
     console.error('Reaction post failed:', e);
-    showToast('⚠️ Failed to post reaction');
+    if (e.code === 'NETWORK_ERROR') {
+      showToast('⚠️ Network error - check connection');
+    } else {
+      showToast('⚠️ Failed to post - try again');
+    }
   }
 };
 
@@ -440,11 +448,37 @@ function renderReactionFeed() {
   }
 }
 
+// ===== FIREBASE RETRY LOGIC WITH EXPONENTIAL BACKOFF =====
+window.firebaseRetry = async function(operation, maxAttempts = 3) {
+  let lastError;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await operation();
+    } catch (e) {
+      lastError = e;
+      // Exponential backoff: 100ms, 200ms, 400ms
+      const delay = Math.pow(2, attempt) * 100;
+      if (attempt < maxAttempts - 1) {
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+  throw lastError;
+};
+
 // Penalty Game
 window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, currentZone: null };
 
 // ===== PENALTY GAME WITH VIDEO CHAT & FIXED ROOMS =====
-window.penaltyVideoState = { localStream: null, remoteStream: null, peerConnection: null, isMuted: false, cameraOff: false };
+window.penaltyVideoState = {
+  localStream: null,
+  remoteStream: null,
+  peerConnection: null,
+  isMuted: false,
+  cameraOff: false,
+  streamTimeout: null,
+  startTime: null
+};
 
 window.startSoloPenalty = function() {
   document.getElementById('penaltyModeSelector').style.display = 'none';
@@ -535,7 +569,12 @@ window.startMultiplayerPenalty = function() {
     return;
   }
 
-  const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
+  // Generate room code: exactly 6 alphanumeric characters (A-Z, 0-9)
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // Removed confusing chars: I, L, O, 0, 1
+  let roomCode = '';
+  for (let i = 0; i < 6; i++) {
+    roomCode += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
 
   const html = `
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000">
@@ -572,15 +611,27 @@ window.createPenaltyRoom = function(code) {
   }
 
   const gamesRef = ref(db, 'penalty_rooms/' + code);
+  const now = Date.now();
 
-  set(gamesRef, {
-    status: 'waiting',
-    host: { uid: window.authUser.uid, name: profile.username || 'Player', score: 0 },
-    guest: null,
-    createdAt: Date.now()
+  showToast('⏳ Creating room...');
+
+  // Use retry logic for room creation
+  window.firebaseRetry(async () => {
+    return set(gamesRef, {
+      status: 'waiting',
+      host: { uid: window.authUser.uid, name: profile.username || 'Player', score: 0 },
+      guest: null,
+      createdAt: now,
+      expiresAt: now + (30 * 60 * 1000) // Expire in 30 minutes
+    });
   }).then(() => {
-    showToast('✅ Room created!');
+    showToast('✅ Room created! Code valid for 30 min');
     closePenaltyDialog();
+
+    // Auto-cleanup room after 30 minutes
+    setTimeout(() => {
+      remove(gamesRef).catch(e => console.log('Auto-cleanup ok'));
+    }, 30 * 60 * 1000);
 
     const html = `
       <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px">
@@ -622,31 +673,67 @@ window.createPenaltyRoom = function(code) {
 
 window.joinPenaltyRoom = async function() {
   const code = prompt('Enter room code (e.g., ABC123):')?.toUpperCase()?.trim();
-  if (!code || code.length !== 6) {
-    showToast('Invalid code format');
+
+  // Validate room code format: exactly 6 alphanumeric characters
+  const codeRegex = /^[A-Z0-9]{6}$/;
+  if (!code || !codeRegex.test(code)) {
+    showToast('❌ Room code must be 6 letters/numbers (e.g., ABC123)');
+    return;
+  }
+
+  if (!window.authUser) {
+    showToast('❌ Sign in first to join');
     return;
   }
 
   const profile = FZ.getProfile();
   const gamesRef = ref(db, 'penalty_rooms/' + code);
 
+  showToast('⏳ Joining room...');
+
   try {
-    const roomData = await get(gamesRef);
+    // Fetch room with retry logic
+    const roomData = await window.firebaseRetry(async () => {
+      return get(gamesRef);
+    });
+
     if (!roomData.exists()) {
-      showToast('❌ Room not found!');
+      showToast('❌ Room not found! Check the code');
       return;
     }
 
-    await update(gamesRef, {
-      'guest': { uid: window.authUser.uid, name: profile.username, score: 0 },
-      'status': 'active'
+    const roomVal = roomData.val();
+    if (roomVal.status !== 'waiting') {
+      showToast('❌ Game already in progress');
+      return;
+    }
+
+    // Check if room has expired
+    const now = Date.now();
+    if (roomVal.expiresAt && now > roomVal.expiresAt) {
+      showToast('❌ Room expired. Create a new one');
+      return;
+    }
+
+    // Join room with retry logic
+    await window.firebaseRetry(async () => {
+      return update(gamesRef, {
+        'guest': { uid: window.authUser.uid, name: profile.username || 'Player', score: 0 },
+        'status': 'active'
+      });
     });
 
-    showToast('✅ Joined penalty room!');
+    showToast('✅ Joined! Starting game...');
     await startPenaltyGame(code, false);
   } catch (e) {
-    showToast('❌ Error joining room!');
-    console.error(e);
+    console.error('Join room error:', e);
+    if (e.message?.includes('PERMISSION_DENIED')) {
+      showToast('❌ Room is locked or expired');
+    } else if (e.code === 'NETWORK_ERROR') {
+      showToast('❌ Network error. Check your connection');
+    } else {
+      showToast('❌ Failed to join. Try again');
+    }
   }
 };
 
@@ -706,15 +793,101 @@ window.startPenaltyGame = async function(code, isHost) {
   showToast(isHost ? '⚽ Kick first!' : '⚽ Opponent kicks first');
 };
 
+// ===== WEBRTC PEER CONNECTION WITH TURN SERVERS =====
+function createPeerConnection() {
+  // TURN servers for firewall/NAT traversal
+  const peerConnection = new RTCPeerConnection({
+    iceServers: [
+      // Public TURN servers for NAT/firewall traversal
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      // Free TURN servers (no auth required)
+      {
+        urls: ['turn:openrelay.metered.ca:80'],
+        username: 'openrelay',
+        credential: 'openrelay'
+      },
+      {
+        urls: ['turn:openrelay.metered.ca:443'],
+        username: 'openrelay',
+        credential: 'openrelay'
+      }
+    ]
+  });
+
+  return peerConnection;
+}
+
 async function startPenaltyVideoChat() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 280 } });
+    // Request camera with retry logic
+    const stream = await window.firebaseRetry(async () => {
+      return navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: { width: 280 }
+      });
+    });
+
     window.penaltyVideoState.localStream = stream;
+    window.penaltyVideoState.startTime = Date.now();
     const localVideo = document.getElementById('penaltyLocalVideo');
     if (localVideo) localVideo.srcObject = stream;
+
+    // Setup video stream timeout (auto-stop after 15 minutes of inactivity)
+    if (window.penaltyVideoState.streamTimeout) {
+      clearTimeout(window.penaltyVideoState.streamTimeout);
+    }
+    window.penaltyVideoState.streamTimeout = setTimeout(() => {
+      console.warn('Video stream timeout - inactive for 15 minutes');
+      showToast('⚠️ Video stopped due to inactivity');
+      if (window.penaltyVideoState.localStream) {
+        window.penaltyVideoState.localStream.getTracks().forEach(t => t.stop());
+      }
+    }, 15 * 60 * 1000); // 15 minutes
+
+    // Setup WebRTC peer connection if multiplayer
+    if (window.penaltyState?.isMultiplayer) {
+      window.penaltyVideoState.peerConnection = createPeerConnection();
+
+      // Add local stream tracks to peer connection
+      stream.getTracks().forEach(track => {
+        window.penaltyVideoState.peerConnection.addTrack(track, stream);
+      });
+
+      // Handle remote stream
+      window.penaltyVideoState.peerConnection.ontrack = (event) => {
+        console.log('Remote track received:', event.track.kind);
+        const remoteVideo = document.getElementById('penaltyRemoteVideo');
+        if (remoteVideo && event.streams[0]) {
+          remoteVideo.srcObject = event.streams[0];
+          window.penaltyVideoState.remoteStream = event.streams[0];
+        }
+      };
+
+      window.penaltyVideoState.peerConnection.onconnectionstatechange = () => {
+        const state = window.penaltyVideoState.peerConnection?.connectionState;
+        console.log('WebRTC connection state:', state);
+        if (state === 'failed' || state === 'disconnected') {
+          showToast('⚠️ Connection issue - stream may be disrupted');
+        }
+      };
+    }
+
     showToast('📹 Camera & Mic enabled');
   } catch (e) {
-    showToast('⚠️ Camera access denied');
+    let errorMsg = '⚠️ Camera access denied';
+    if (e.name === 'NotAllowedError') {
+      errorMsg = '❌ Camera/Mic permission denied. You can still play!';
+    } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+      errorMsg = '❌ No camera/mic found on this device';
+    } else if (e.name === 'NotReadableError') {
+      errorMsg = '❌ Camera/Mic is in use by another app';
+    } else if (e.name === 'SecurityError') {
+      errorMsg = '❌ HTTPS required for camera access';
+    }
+    showToast(errorMsg);
+    console.warn('Video error:', e.name, e.message);
   }
 }
 
@@ -743,9 +916,39 @@ window.togglePenaltyCamera = function() {
 };
 
 window.endPenaltyGame = function() {
-  if (window.penaltyVideoState.localStream) {
-    window.penaltyVideoState.localStream.getTracks().forEach(t => t.stop());
+  // Clear stream timeout
+  if (window.penaltyVideoState.streamTimeout) {
+    clearTimeout(window.penaltyVideoState.streamTimeout);
+    window.penaltyVideoState.streamTimeout = null;
   }
+
+  // Clean up local stream
+  if (window.penaltyVideoState.localStream) {
+    window.penaltyVideoState.localStream.getTracks().forEach(t => {
+      t.stop();
+    });
+    window.penaltyVideoState.localStream = null;
+  }
+
+  // Clean up remote stream
+  if (window.penaltyVideoState.remoteStream) {
+    window.penaltyVideoState.remoteStream.getTracks().forEach(t => {
+      t.stop();
+    });
+    window.penaltyVideoState.remoteStream = null;
+  }
+
+  // Clean up peer connection
+  if (window.penaltyVideoState.peerConnection) {
+    window.penaltyVideoState.peerConnection.close();
+    window.penaltyVideoState.peerConnection = null;
+  }
+
+  // Clear video elements
+  const localVideo = document.getElementById('penaltyLocalVideo');
+  const remoteVideo = document.getElementById('penaltyRemoteVideo');
+  if (localVideo) localVideo.srcObject = null;
+  if (remoteVideo) remoteVideo.srcObject = null;
 
   const stats = FZ.getStats();
   stats.xp = (stats.xp || 0) + (window.penaltyState.playerScore * 100);
@@ -757,6 +960,16 @@ window.endPenaltyGame = function() {
     document.getElementById('penaltyGame').style.display = 'none';
     document.getElementById('penaltyModeSelector').style.display = 'block';
   }, 1500);
+};
+
+window.closePenalty = function() {
+  endPenaltyGame();
+};
+
+window.restartPenalty = function() {
+  document.getElementById('penaltyGame').style.display = 'none';
+  document.getElementById('penaltyModeSelector').style.display = 'block';
+  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, currentZone: null };
 };
 
 // Tab switching

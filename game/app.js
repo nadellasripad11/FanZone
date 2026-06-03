@@ -12,33 +12,76 @@ const FB_CONFIG = {
 window.FZ = {
   user: null,
   profile: null,
+  _guestId: null,
+
+  getGuestId() {
+    if (!this._guestId) {
+      let id = localStorage.getItem('fz_guest_id');
+      if (!id) {
+        id = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+        localStorage.setItem('fz_guest_id', id);
+      }
+      this._guestId = id;
+    }
+    return this._guestId;
+  },
+
+  getUserKey() {
+    return this.user?.uid || this.getGuestId();
+  },
 
   getProfile() {
-    if (!this.user) return null;
-    const saved = localStorage.getItem('fz_profile_' + this.user.uid);
+    const key = this.getUserKey();
+    const saved = localStorage.getItem('fz_profile_' + key);
     return saved ? JSON.parse(saved) : null;
   },
 
   saveProfile(data) {
-    if (!this.user) return;
+    const key = this.getUserKey();
     const current = this.getProfile() || {};
     const updated = { ...current, ...data };
-    localStorage.setItem('fz_profile_' + this.user.uid, JSON.stringify(updated));
+    localStorage.setItem('fz_profile_' + key, JSON.stringify(updated));
     this.profile = updated;
     return updated;
   },
 
+  // Migrate guest data to authenticated user
+  migrateGuestDataToUser(userId) {
+    const guestId = this.getGuestId();
+    if (guestId === userId) return; // Already migrated
+
+    // Migrate all guest data
+    const keys = ['profile', 'stats', 'streak', 'challenges', 'bonus'];
+    keys.forEach(key => {
+      const guestKey = `fz_${key}_${guestId}`;
+      const userKey = `fz_${key}_${userId}`;
+      const data = localStorage.getItem(guestKey);
+      if (data && !localStorage.getItem(userKey)) {
+        localStorage.setItem(userKey, data);
+      }
+    });
+
+    // Clear old guest data
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('_' + guestId)) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    this._guestId = null;
+  },
+
   getStats() {
-    if (!this.user) return { xp: 0, streak: 0, predictions: 0, accuracy: 0 };
-    const saved = localStorage.getItem('fz_stats_' + this.user.uid);
+    const key = this.getUserKey();
+    const saved = localStorage.getItem('fz_stats_' + key);
     return saved ? JSON.parse(saved) : { xp: 0, streak: 0, predictions: 0, accuracy: 68 };
   },
 
   saveStats(data) {
-    if (!this.user) return;
+    const key = this.getUserKey();
     const current = this.getStats();
     const updated = { ...current, ...data };
-    localStorage.setItem('fz_stats_' + this.user.uid, JSON.stringify(updated));
+    localStorage.setItem('fz_stats_' + key, JSON.stringify(updated));
     return updated;
   },
 
@@ -52,13 +95,13 @@ window.FZ = {
   },
 
   isOnboarded() {
-    if (!this.user) return !!localStorage.getItem('fz_guest_onboarded');
-    return !!localStorage.getItem('fz_onboarded_' + this.user.uid);
+    const key = this.getUserKey();
+    return !!localStorage.getItem('fz_onboarded_' + key);
   },
 
   markOnboarded() {
-    if (this.user) localStorage.setItem('fz_onboarded_' + this.user.uid, '1');
-    else localStorage.setItem('fz_guest_onboarded', '1');
+    const key = this.getUserKey();
+    localStorage.setItem('fz_onboarded_' + key, '1');
   },
 
   generateReferralCode() {
@@ -71,7 +114,6 @@ window.FZ = {
   },
 
   getReferralCode() {
-    if (!this.user) return null;
     let profile = this.getProfile();
     if (!profile) profile = {};
 
@@ -91,7 +133,6 @@ window.FZ = {
   },
 
   applyReferral(referralCode) {
-    if (!this.user) return;
     const stats = this.getStats();
     // Check if already claimed
     if (stats.referralApplied) return false;
@@ -103,7 +144,6 @@ window.FZ = {
   },
 
   checkAndApplyReferral() {
-    if (!this.user) return null;
     const params = new URLSearchParams(window.location.search);
     const refCode = params.get('ref');
 
@@ -117,14 +157,14 @@ window.FZ = {
 
   // ── STREAKS ──
   getStreak() {
-    if (!this.user) return { current: 0, longest: 0, lastDate: null };
-    const saved = localStorage.getItem('fz_streak_' + this.user.uid);
+    const key = this.getUserKey();
+    const saved = localStorage.getItem('fz_streak_' + key);
     return saved ? JSON.parse(saved) : { current: 0, longest: 0, lastDate: null };
   },
 
   saveStreak(data) {
-    if (!this.user) return;
-    localStorage.setItem('fz_streak_' + this.user.uid, JSON.stringify(data));
+    const key = this.getUserKey();
+    localStorage.setItem('fz_streak_' + key, JSON.stringify(data));
   },
 
   updateStreak() {
@@ -158,8 +198,8 @@ window.FZ = {
 
   // ── CHALLENGES ──
   getChallenges() {
-    if (!this.user) return [];
-    const saved = localStorage.getItem('fz_challenges_' + this.user.uid);
+    const key = this.getUserKey();
+    const saved = localStorage.getItem('fz_challenges_' + key);
     return saved ? JSON.parse(saved) : this.getDefaultChallenges();
   },
 
@@ -174,12 +214,11 @@ window.FZ = {
   },
 
   saveChallenges(challenges) {
-    if (!this.user) return;
-    localStorage.setItem('fz_challenges_' + this.user.uid, JSON.stringify(challenges));
+    const key = this.getUserKey();
+    localStorage.setItem('fz_challenges_' + key, JSON.stringify(challenges));
   },
 
   updateChallenge(type, increment = 1) {
-    if (!this.user) return [];
     const challenges = this.getChallenges();
     const today = new Date().toDateString();
 
@@ -249,9 +288,9 @@ window.FZ = {
 
   // ── DAILY BONUS ──
   claimDailyBonus() {
-    if (!this.user) return false;
     const today = new Date().toDateString();
-    const lastBonus = localStorage.getItem('fz_bonus_' + this.user.uid);
+    const key = this.getUserKey();
+    const lastBonus = localStorage.getItem('fz_bonus_' + key);
 
     if (lastBonus === today) {
       return false; // Already claimed today
@@ -262,7 +301,7 @@ window.FZ = {
     stats.dailyBonus = (stats.dailyBonus || 0) + 1;
     this.saveStats(stats);
 
-    localStorage.setItem('fz_bonus_' + this.user.uid, today);
+    localStorage.setItem('fz_bonus_' + key, today);
 
     showToast('🎁 Daily Bonus +100 XP');
     this.sendNotification('🎁 Daily Bonus Claimed!', {
@@ -275,13 +314,19 @@ window.FZ = {
 
   // ── YOUTUBE SUBSCRIPTION PROMPT ──
   showYouTubePrompt() {
-    if (!this.user) return;
-    const today = new Date().toDateString();
-    const promptShown = localStorage.getItem('fz_youtube_prompt_' + this.user.uid);
+    const key = this.getUserKey();
+    const profile = this.getProfile() || {};
 
-    if (promptShown === today) return; // Already shown today
+    // Only show once per user session (not once per day)
+    // Store in profile so it persists even if localStorage cleared
+    if (profile.youtubePromptShown) return;
 
-    localStorage.setItem('fz_youtube_prompt_' + this.user.uid, today);
+    // Mark as shown in profile
+    profile.youtubePromptShown = true;
+    this.saveProfile(profile);
+
+    // Also set localStorage for session awareness
+    localStorage.setItem('fz_youtube_prompt_session_' + key, '1');
 
     const html = `
       <div style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;animation:fadeIn .3s">
@@ -305,6 +350,58 @@ window.FZ = {
     document.body.insertAdjacentHTML('beforeend', html);
   }
 };
+
+// ── OFFLINE DETECTION ──
+window.initOfflineDetection = function() {
+  const updateOnlineStatus = () => {
+    const isOnline = navigator.onLine;
+    const indicator = document.getElementById('fz-offline-indicator');
+
+    if (!isOnline) {
+      // Create offline indicator if it doesn't exist
+      if (!indicator) {
+        const div = document.createElement('div');
+        div.id = 'fz-offline-indicator';
+        div.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: #ff4444;
+          color: white;
+          text-align: center;
+          padding: 8px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          z-index: 9999;
+          animation: slideDown 0.3s;
+        `;
+        div.textContent = '📡 You\'re offline - some features unavailable';
+        document.body.insertAdjacentElement('afterbegin', div);
+      }
+    } else {
+      // Remove offline indicator when back online
+      if (indicator) {
+        indicator.style.animation = 'slideUp 0.3s';
+        setTimeout(() => indicator.remove(), 300);
+      }
+    }
+  };
+
+  // Listen for online/offline events
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+
+  // Initial check
+  updateOnlineStatus();
+};
+
+// Start offline detection when page loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', window.initOfflineDetection);
+} else {
+  window.initOfflineDetection();
+}
 
 // ── TOAST ──
 let _toastTimer;
@@ -343,3 +440,26 @@ window.closeYouTubePrompt = function() {
 window.showYouTubePrompt = function() {
   FZ.showYouTubePrompt();
 };
+
+// ── GLOBAL ERROR HANDLING ──
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+  // Only show toast for serious errors, not third-party script errors
+  if (event.error?.message?.includes('Firebase') || event.error?.message?.includes('WebRTC')) {
+    showToast('⚠️ An error occurred - try refreshing');
+  }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  // Prevent app crash, show user-friendly message
+  if (event.reason?.message?.includes('Firebase')) {
+    showToast('⚠️ Firebase error - check your connection');
+  } else if (event.reason?.message?.includes('Network')) {
+    showToast('⚠️ Network error - check your connection');
+  }
+  // Don't preventDefault unless it's a known recoverable error
+  if (!event.reason?.recoverable) {
+    // Let the error propagate for debugging
+  }
+});

@@ -149,15 +149,20 @@ window._signInEmail = (e,p) => signInWithEmailAndPassword(auth,e,p);
 
 onAuthStateChanged(auth, user => {
   FZ.user = user;
-  if (user && FZ.isOnboarded()) {
-    // User is already onboarded, go to home
-    window.location.href = 'home.html';
-  } else if (!user) {
+  if (user) {
+    // Migrate any guest data to this authenticated user
+    FZ.migrateGuestDataToUser(user.uid);
+
+    if (FZ.isOnboarded()) {
+      // User is already onboarded, go to home
+      window.location.href = 'home.html';
+    }
+    // If user is signed in but not onboarded, onboarding will be started by submitEmail()
+  } else {
     // User not signed in, show auth screen
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('onboardWrap').style.display = 'none';
   }
-  // If user is signed in but not onboarded, onboarding will be started by submitEmail()
 });
 </script>
 <script>
