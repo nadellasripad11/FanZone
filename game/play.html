@@ -188,8 +188,8 @@
   <!-- Mode Selector -->
   <div id="penaltyModeSelector" class="mode-selector">
     <div style="text-align:center;margin-bottom:16px">
-      <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:6px">⚽ Penalty Shootout</div>
-      <div style="font-size:.85rem;color:var(--text-3)">Test your skills</div>
+      <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:6px">⚽ PENALTY SHOOTOUT</div>
+      <div style="font-size:.85rem;color:var(--text-3)">FIFA 26 Style • Real Opponents</div>
     </div>
     <div class="mode-grid">
       <div class="mode-card" onclick="startSoloPenalty()">
@@ -198,51 +198,97 @@
         <div class="mode-card__sub">Beat the keeper</div>
       </div>
       <div class="mode-card" onclick="startMultiplayerPenalty()">
-        <div class="mode-card__icon">⚡</div>
+        <div class="mode-card__icon">📹</div>
         <div class="mode-card__title">vs Friend</div>
-        <div class="mode-card__sub">Real opponent</div>
+        <div class="mode-card__sub">Live video & voice</div>
       </div>
     </div>
   </div>
 
-  <!-- Solo Penalty Game -->
-  <div id="penaltyGame">
-    <div class="penalty-arena">
-      <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin-bottom:8px">⚽ PENALTY SHOOTOUT</div>
-      <div style="font-size:.8rem;color:var(--text-3);margin-bottom:12px">Kick <span id="kickNum">1</span> of 5</div>
+  <!-- Penalty Game with Video Chat -->
+  <div id="penaltyGame" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:500;padding:12px;overflow-y:auto">
+    <!-- Video Grid -->
+    <div id="penaltyVideoGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;height:200px">
+      <div style="background:#000;border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative">
+        <video id="penaltyLocalVideo" autoplay muted style="width:100%;height:100%;object-fit:cover"></video>
+        <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);color:var(--text-1);font-size:.7rem;padding:4px 8px;border-radius:3px">You</div>
+      </div>
+      <div style="background:#000;border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative">
+        <video id="penaltyRemoteVideo" autoplay style="width:100%;height:100%;object-fit:cover"></video>
+        <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);color:var(--text-1);font-size:.7rem;padding:4px 8px;border-radius:3px">Opponent</div>
+      </div>
+    </div>
 
-      <!-- SCORE -->
-      <div class="score-board">
+    <!-- FIFA 26 Penalty Arena -->
+    <div class="penalty-arena" style="position:relative;margin-bottom:12px">
+      <!-- Score Board -->
+      <div class="score-board" style="margin-bottom:12px">
         <div class="score-board__player">
-          <div class="score-board__label">You</div>
-          <div class="score-board__score" id="penYou">0</div>
+          <div class="score-board__label" style="font-size:.75rem">You</div>
+          <div class="score-board__score" id="penYou" style="font-size:2rem">0</div>
         </div>
+        <div style="color:var(--text-3)">Kick <span id="kickNum">1</span>/5</div>
         <div class="score-board__player">
-          <div class="score-board__label">Keeper</div>
-          <div class="score-board__score" id="penKeeper">0</div>
+          <div class="score-board__label" style="font-size:.75rem">Opponent</div>
+          <div class="score-board__score" id="penOpponent" style="font-size:2rem">0</div>
         </div>
       </div>
 
-      <!-- RESULT MESSAGE -->
-      <div class="penalty-result" id="penResult"></div>
+      <!-- FIFA 26 Goal Visualization -->
+      <svg width="100%" height="220" viewBox="0 0 300 220" style="background:linear-gradient(180deg,#1a4d1a,#0d2d0d);border:1px solid var(--border-green);border-radius:6px;display:block;margin:0 auto" id="goalCanvas">
+        <!-- Field -->
+        <rect x="0" y="160" width="300" height="60" fill="#0d5d0d"/>
+        <line x1="0" y1="160" x2="300" y2="160" stroke="var(--green)" stroke-width="2"/>
 
-      <!-- FOOTBALL PITCH WITH GOAL -->
-      <div class="pitch" id="pitchEl">
-        <div class="keeper" id="keeper">🧤</div>
-        <div class="ball" id="ball" style="display:none"></div>
-        <div class="kicker" id="kicker">⚽</div>
-        <div class="goal-post"></div>
-      </div>
+        <!-- Goal Post (White) -->
+        <rect x="110" y="60" width="80" height="100" fill="none" stroke="#fff" stroke-width="3" rx="4"/>
+        <line x1="130" y1="60" x2="130" y2="160" stroke="#fff" stroke-width="2"/>
+        <line x1="170" y1="60" x2="170" y2="160" stroke="#fff" stroke-width="2"/>
 
-      <!-- SHOT DIRECTION SELECTOR -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:16px 0;max-width:200px;margin-left:auto;margin-right:auto" id="shotSelector">
-        <button onclick="shoot(0)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↖️</button>
-        <button onclick="shoot(1)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">⬆️</button>
-        <button onclick="shoot(2)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↗️</button>
-        <button onclick="shoot(3)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↙️</button>
-        <button onclick="shoot(4)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">⬇️</button>
-        <button onclick="shoot(5)" style="background:rgba(204,255,0,.1);border:1px solid var(--border-green);color:var(--green);padding:10px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1.2rem;transition:all .15s">↘️</button>
+        <!-- Goal Net -->
+        <defs>
+          <pattern id="netPattern" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M0,0 l8,8 M8,0 l-8,8" stroke="rgba(255,255,255,.2)" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect x="110" y="60" width="80" height="100" fill="url(#netPattern)"/>
+
+        <!-- Keeper -->
+        <g id="keeperVisual">
+          <circle cx="150" cy="90" r="12" fill="#FF6B00" stroke="#FFB347" stroke-width="1"/>
+          <circle cx="140" cy="85" r="3" fill="#000"/>
+          <circle cx="160" cy="85" r="3" fill="#000"/>
+          <rect x="145" y="102" width="10" height="20" fill="#1a1a1a"/>
+        </g>
+
+        <!-- Ball -->
+        <circle id="ballVisual" cx="40" cy="140" r="6" fill="#fff" stroke="#000" stroke-width="1" opacity="0"/>
+
+        <!-- Penalty Spot -->
+        <circle cx="150" cy="180" r="2" fill="var(--green)" opacity="0.5"/>
+      </svg>
+
+      <!-- Result Text -->
+      <div class="penalty-result" id="penResult" style="margin-top:10px"></div>
+
+      <!-- Shot Direction Selector -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px auto;max-width:160px" id="shotSelector">
+        <button onclick="shootPenalty(0)" style="background:rgba(204,255,0,.15);border:1px solid var(--border-green);color:var(--green);padding:8px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1rem;transition:all .15s">↖️</button>
+        <button onclick="shootPenalty(1)" style="background:rgba(204,255,0,.15);border:1px solid var(--border-green);color:var(--green);padding:8px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1rem;transition:all .15s">⬆️</button>
+        <button onclick="shootPenalty(2)" style="background:rgba(204,255,0,.15);border:1px solid var(--border-green);color:var(--green);padding:8px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1rem;transition:all .15s">↗️</button>
+        <button onclick="shootPenalty(3)" style="background:rgba(204,255,0,.15);border:1px solid var(--border-green);color:var(--green);padding:8px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1rem;transition:all .15s">↙️</button>
+        <button onclick="shootPenalty(4)" style="background:rgba(204,255,0,.15);border:1px solid var(--border-green);color:var(--green);padding:8px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1rem;transition:all .15s">⬇️</button>
+        <button onclick="shootPenalty(5)" style="background:rgba(204,255,0,.15);border:1px solid var(--border-green);color:var(--green);padding:8px;border-radius:4px;cursor:pointer;font-weight:700;font-size:1rem;transition:all .15s">↘️</button>
       </div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div style="display:flex;gap:8px;justify-content:center;padding:0 12px">
+      <button id="penaltyMicBtn" onclick="togglePenaltyMic()" style="flex:1;background:var(--green);color:#000;border:none;padding:10px;border-radius:4px;font-weight:700;cursor:pointer;font-size:.9rem">🎤 Mic On</button>
+      <button id="penaltyCameraBtn" onclick="togglePenaltyCamera()" style="flex:1;background:var(--green);color:#000;border:none;padding:10px;border-radius:4px;font-weight:700;cursor:pointer;font-size:.9rem">📹 Cam On</button>
+      <button onclick="endPenaltyGame()" style="flex:1;background:var(--red-dim);color:var(--red);border:1px solid var(--red);padding:10px;border-radius:4px;font-weight:700;cursor:pointer;font-size:.9rem">Exit</button>
+    </div>
+  </div>
 
       <!-- KICK PROGRESS -->
       <div class="kicks-row" id="kickDots"></div>
@@ -397,143 +443,91 @@ function renderReactionFeed() {
 // Penalty Game
 window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, currentZone: null };
 
+// ===== PENALTY GAME WITH VIDEO CHAT & FIXED ROOMS =====
+window.penaltyVideoState = { localStream: null, remoteStream: null, peerConnection: null, isMuted: false, cameraOff: false };
+
 window.startSoloPenalty = function() {
   document.getElementById('penaltyModeSelector').style.display = 'none';
   document.getElementById('penaltyGame').style.display = 'block';
-  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0 };
+  document.getElementById('penaltyVideoGrid').style.display = 'none';
+  window.penaltyState = { kicks: 0, playerScore: 0, keeperScore: 0, isMultiplayer: false };
   renderPenaltyUI();
 };
 
-window.shoot = function(zone) {
-  window.penaltyState.currentZone = zone;
-
-  // Disable buttons while shooting
+window.shootPenalty = function(zone) {
   document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = true);
 
-  // Animate kicker
-  const kicker = document.getElementById('kicker');
-  kicker.style.animation = 'kickAnimation .3s ease';
+  // Animate ball on SVG canvas
+  const ballVisual = document.getElementById('ballVisual');
+  const zonePositions = [
+    {x: 110, y: 80},    // top-left
+    {x: 150, y: 70},    // top-center
+    {x: 190, y: 80},    // top-right
+    {x: 110, y: 130},   // bottom-left
+    {x: 150, y: 140},   // bottom-center
+    {x: 190, y: 130}    // bottom-right
+  ];
+
+  ballVisual.style.opacity = '1';
+  ballVisual.style.transition = 'cx .3s ease, cy .3s ease, r .3s ease';
+  ballVisual.setAttribute('cx', zonePositions[zone].x);
+  ballVisual.setAttribute('cy', zonePositions[zone].y);
 
   setTimeout(() => {
-    kicker.style.animation = '';
-
-    // AI keeper moves to a random zone
     const aiZone = Math.floor(Math.random() * 6);
     const isGoal = zone !== aiZone;
 
     // Move keeper
-    const keeper = document.getElementById('keeper');
-    const zonePositions = ['↖️', '⬆️', '↗️', '↙️', '⬇️', '↘️'];
-    keeper.textContent = zonePositions[aiZone];
-    keeper.style.transition = 'none';
-
-    // Animate ball trajectory
-    const ball = document.getElementById('ball');
-    const pitch = document.getElementById('pitchEl');
-    const pitchRect = pitch.getBoundingClientRect();
-    const pitchWidth = pitch.offsetWidth;
-    const pitchHeight = pitch.offsetHeight;
-
-    // Ball start position (kicker)
-    const startX = pitchWidth / 2;
-    const startY = pitchHeight - 15;
-
-    // Ball end position based on shot zone
-    const zoneOffsets = [
-      {x: -60, y: -60}, // top-left
-      {x: 0, y: -70},   // top-center
-      {x: 60, y: -60},  // top-right
-      {x: -60, y: -20}, // bottom-left
-      {x: 0, y: -30},   // bottom-center
-      {x: 60, y: -20}   // bottom-right
-    ];
-
-    const endX = startX + zoneOffsets[zone].x;
-    const endY = startY + zoneOffsets[zone].y;
-
-    ball.style.left = startX + 'px';
-    ball.style.top = startY + 'px';
-    ball.style.display = 'block';
-    ball.style.setProperty('--tx', (endX - startX) + 'px');
-    ball.style.setProperty('--ty', (endY - startY) + 'px');
-    ball.style.animation = 'shootBall .4s ease-out forwards';
+    const keeperVisual = document.getElementById('keeperVisual');
+    const keeperMoves = [-25, 0, 25, -25, 0, 25];
+    keeperVisual.style.transition = 'transform .3s ease';
+    keeperVisual.style.transform = `translateX(${keeperMoves[aiZone]}px)`;
 
     setTimeout(() => {
-      ball.style.display = 'none';
-
       if (isGoal) {
         window.penaltyState.playerScore++;
         document.getElementById('penResult').textContent = '⚽ GOAL!';
         document.getElementById('penResult').className = 'penalty-result goal';
-        keeper.style.animation = 'shake .2s';
-
-        // Update challenges
         FZ.updateChallenge('goals', 1);
       } else {
         document.getElementById('penResult').textContent = '🧤 SAVED!';
         document.getElementById('penResult').className = 'penalty-result saved';
-        keeper.style.animation = 'bounce .3s';
       }
 
       window.penaltyState.kicks++;
       document.getElementById('penYou').textContent = window.penaltyState.playerScore;
 
-      // Sync score to Firebase if multiplayer
+      // Sync score for multiplayer
       if (window.penaltyState.isMultiplayer && window.currentGameRef) {
         const path = window.penaltyState.isHost ? 'players/host/score' : 'players/guest/score';
         update(window.currentGameRef, { [path]: window.penaltyState.playerScore });
       }
 
       if (window.penaltyState.kicks >= 5) {
-        setTimeout(endPenalty, 1000);
+        setTimeout(() => endPenaltyGame(), 1000);
       } else {
-        setTimeout(resetPenalty, 1500);
+        setTimeout(() => {
+          document.getElementById('kickNum').textContent = (window.penaltyState.kicks + 1);
+          document.getElementById('penResult').textContent = '';
+          ballVisual.style.opacity = '0';
+          ballVisual.style.transition = 'none';
+          ballVisual.setAttribute('cx', '40');
+          ballVisual.setAttribute('cy', '140');
+          keeperVisual.style.transform = 'translateX(0)';
+          document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = false);
+        }, 1500);
       }
-    }, 400);
+    }, 300);
   }, 300);
 };
 
 function renderPenaltyUI() {
   document.getElementById('penYou').textContent = '0';
-  document.getElementById('penKeeper').textContent = '0';
+  document.getElementById('penOpponent').textContent = '0';
   document.getElementById('kickNum').textContent = '1';
   document.getElementById('penResult').textContent = '';
-  document.getElementById('keeper').textContent = '🧤';
-  document.getElementById('kicker').style.animation = '';
-  document.getElementById('ball').style.display = 'none';
   document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = false);
 }
-
-function resetPenalty() {
-  document.getElementById('kickNum').textContent = (window.penaltyState.kicks + 1);
-  document.getElementById('penResult').textContent = '';
-  document.getElementById('keeper').textContent = '🧤';
-  document.getElementById('kicker').style.animation = '';
-  document.getElementById('ball').style.display = 'none';
-  document.querySelectorAll('#shotSelector button').forEach(b => b.disabled = false);
-}
-
-window.endPenalty = function() {
-  document.getElementById('penClose').style.display = 'block';
-  document.getElementById('penRestart').style.display = 'block';
-  document.querySelectorAll('.goal-zone').forEach(z => z.style.pointerEvents = 'none');
-
-  if (window.authUser) {
-    const stats = FZ.getStats();
-    stats.xp = (stats.xp || 0) + (window.penaltyState.playerScore * 100);
-    FZ.saveStats(stats);
-    showToast('⚡ +' + (window.penaltyState.playerScore * 100) + ' XP');
-  }
-};
-
-window.closePenalty = function() {
-  document.getElementById('penaltyGame').style.display = 'none';
-  document.getElementById('penaltyModeSelector').style.display = 'block';
-};
-
-window.restartPenalty = function() {
-  startSoloPenalty();
-};
 
 window.startMultiplayerPenalty = function() {
   if (!window.authUser) {
@@ -541,24 +535,22 @@ window.startMultiplayerPenalty = function() {
     return;
   }
 
-  showToast('⚽ Choose: Create Room or Join with Code');
-
   const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
 
   const html = `
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000">
       <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:280px;width:90%">
-        <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-bottom:14px">⚽ Multiplayer</div>
+        <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-bottom:14px">⚽ Penalty Multiplayer</div>
 
-        <button onclick="createMultiRoom('${roomCode}')" style="width:100%;background:var(--green);color:#000;font-weight:700;padding:12px;border:none;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px;font-size:.9rem">
+        <button onclick="createPenaltyRoom('${roomCode}')" style="width:100%;background:var(--green);color:#000;font-weight:700;padding:12px;border:none;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px;font-size:.9rem">
           ➕ Create Room
         </button>
 
-        <button onclick="joinMultiRoom()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);font-weight:700;padding:12px;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px;font-size:.9rem">
+        <button onclick="joinPenaltyRoom()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);font-weight:700;padding:12px;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:10px;font-size:.9rem">
           🔗 Join Room
         </button>
 
-        <button onclick="closeMultiDialog()" style="width:100%;background:transparent;border:none;color:var(--text-3);cursor:pointer;padding:8px;font-size:.85rem">
+        <button onclick="closePenaltyDialog()" style="width:100%;background:transparent;border:none;color:var(--text-3);cursor:pointer;padding:8px;font-size:.85rem">
           Cancel
         </button>
       </div>
@@ -567,40 +559,33 @@ window.startMultiplayerPenalty = function() {
   document.body.insertAdjacentHTML('beforeend', html);
 };
 
-window.createMultiRoom = function(code) {
-  window.currentRoomCode = code;
-  closeMultiDialog();
-
-  // Create room in Firebase
-  const gamesRef = ref(db, 'mp_games/' + code);
+window.createPenaltyRoom = function(code) {
   const profile = FZ.getProfile();
+  const gamesRef = ref(db, 'penalty_rooms/' + code);
   set(gamesRef, {
     status: 'waiting',
-    players: {
-      host: { uid: window.authUser.uid, name: profile.username, score: 0 },
-      guest: null
-    },
-    roomCode: code,
+    host: { uid: window.authUser.uid, name: profile.username, score: 0 },
+    guest: null,
     createdAt: Date.now()
   });
+
+  closePenaltyDialog();
 
   const html = `
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px">
       <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:300px;width:100%">
-        <div style="font-family:var(--font-display);font-size:1rem;font-weight:900;margin-bottom:14px">⏳ Waiting for Friend</div>
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:900;margin-bottom:14px">⏳ Waiting for Friend...</div>
 
         <div style="background:var(--bg-2);border:2px solid var(--border-green);border-radius:var(--radius-sm);padding:14px;text-align:center;margin-bottom:14px">
           <div style="font-size:.75rem;color:var(--text-3);margin-bottom:6px">ROOM CODE</div>
           <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green);letter-spacing:.1em">${code}</div>
         </div>
 
-        <button onclick="copyCode('${code}')" style="width:100%;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:10px;font-weight:700;cursor:pointer;margin-bottom:10px;font-size:.85rem">
+        <button onclick="navigator.clipboard.writeText('${code}'); alert('Code copied!')" style="width:100%;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:10px;font-weight:700;cursor:pointer;margin-bottom:10px;font-size:.85rem">
           📋 Copy Code
         </button>
 
-        <div id="roomStatus" style="font-size:.8rem;color:var(--green);text-align:center;margin-bottom:10px">Listening for opponent...</div>
-
-        <button onclick="cancelWait()" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);border-radius:var(--radius-sm);padding:10px;cursor:pointer;font-size:.85rem">
+        <button onclick="cancelPenaltyWait('${code}')" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text-2);border-radius:var(--radius-sm);padding:10px;cursor:pointer;font-size:.85rem">
           Cancel
         </button>
       </div>
@@ -608,43 +593,41 @@ window.createMultiRoom = function(code) {
   `;
   document.body.insertAdjacentHTML('beforeend', html);
 
-  // Listen for opponent joining
-  const roomRef = ref(db, 'mp_games/' + code);
+  const roomRef = ref(db, 'penalty_rooms/' + code);
   onValue(roomRef, snap => {
     const room = snap.val();
-    if (room?.players?.guest) {
-      closeMultiDialog();
-      startMultiplayerGame(code, true); // true = host
+    if (room?.guest) {
+      closePenaltyDialog();
+      startPenaltyGame(code, true);
     }
   });
+
+  window.penaltyCurrentRoom = code;
 };
 
-window.joinMultiRoom = function() {
-  const code = prompt('Enter room code (e.g., ABC123):')?.toUpperCase();
-  if (!code) return;
+window.joinPenaltyRoom = function() {
+  const code = prompt('Enter room code (e.g., ABC123):')?.toUpperCase()?.trim();
+  if (!code || code.length !== 6) {
+    showToast('Invalid code format');
+    return;
+  }
 
-  closeMultiDialog();
   const profile = FZ.getProfile();
-  const gamesRef = ref(db, 'mp_games/' + code);
+  const gamesRef = ref(db, 'penalty_rooms/' + code);
 
-  // Join as guest
-  update(gamesRef, {
-    'players/guest': { uid: window.authUser.uid, name: profile.username, score: 0 },
-    'status': 'active'
+  set(gamesRef, {
+    status: 'active',
+    host: { uid: (await get(gamesRef)).val()?.host?.uid },
+    guest: { uid: window.authUser.uid, name: profile.username, score: 0 }
   }).then(() => {
-    showToast('⚡ Joined room ' + code);
-    setTimeout(() => startMultiplayerGame(code, false), 500); // false = guest
+    showToast('✅ Joined penalty room!');
+    startPenaltyGame(code, false);
   }).catch(e => {
     showToast('❌ Room not found!');
   });
 };
 
-window.copyCode = function(code) {
-  navigator.clipboard.writeText(code);
-  showToast('✅ Code copied to clipboard!');
-};
-
-window.closeMultiDialog = function() {
+window.closePenaltyDialog = function() {
   document.querySelectorAll('[style*="position:fixed"]').forEach(el => {
     if (el.innerHTML.includes('Multiplayer') || el.innerHTML.includes('Waiting for')) {
       el.remove();
@@ -652,17 +635,15 @@ window.closeMultiDialog = function() {
   });
 };
 
-window.cancelWait = function() {
-  window.currentRoomCode = null;
-  if (window.currentGameRef) {
-    remove(window.currentGameRef).catch(e => console.log('cleanup ok'));
-  }
-  closeMultiDialog();
+window.cancelPenaltyWait = function(code) {
+  remove(ref(db, 'penalty_rooms/' + code)).catch(e => {});
+  closePenaltyDialog();
 };
 
-window.startMultiplayerGame = function(code, isHost) {
+window.startPenaltyGame = async function(code, isHost) {
   document.getElementById('penaltyModeSelector').style.display = 'none';
   document.getElementById('penaltyGame').style.display = 'block';
+  document.getElementById('penaltyVideoGrid').style.display = 'grid';
 
   window.penaltyState = {
     kicks: 0,
@@ -673,22 +654,76 @@ window.startMultiplayerGame = function(code, isHost) {
     roomCode: code
   };
 
-  // Listen to opponent's shots
-  const gameRef = ref(db, 'mp_games/' + code);
-  window.currentGameRef = gameRef;
+  window.currentGameRef = ref(db, 'penalty_rooms/' + code);
 
-  onValue(gameRef, snap => {
+  // Start video/audio
+  await startPenaltyVideoChat();
+
+  onValue(window.currentGameRef, snap => {
     const room = snap.val();
     if (room) {
-      const opponent = isHost ? room.players.guest : room.players.host;
-      if (opponent) {
-        document.getElementById('penKeeper').textContent = opponent.score || '0';
+      const opponent = isHost ? room.guest : room.host;
+      if (opponent?.score !== undefined) {
+        document.getElementById('penOpponent').textContent = opponent.score;
       }
     }
   });
 
   renderPenaltyUI();
-  showToast(isHost ? '⚽ Opponent joined! You kick first' : '⚽ Connected! Waiting for host');
+  showToast(isHost ? '⚽ Kick first!' : '⚽ Opponent kicks first');
+};
+
+async function startPenaltyVideoChat() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 280 } });
+    window.penaltyVideoState.localStream = stream;
+    const localVideo = document.getElementById('penaltyLocalVideo');
+    if (localVideo) localVideo.srcObject = stream;
+    showToast('📹 Camera & Mic enabled');
+  } catch (e) {
+    showToast('⚠️ Camera access denied');
+  }
+}
+
+window.togglePenaltyMic = function() {
+  const btn = document.getElementById('penaltyMicBtn');
+  if (window.penaltyVideoState.localStream) {
+    const audio = window.penaltyVideoState.localStream.getAudioTracks()[0];
+    if (audio) {
+      audio.enabled = !audio.enabled;
+      window.penaltyVideoState.isMuted = !audio.enabled;
+      btn.textContent = audio.enabled ? '🎤 Mic On' : '🔇 Mic Off';
+    }
+  }
+};
+
+window.togglePenaltyCamera = function() {
+  const btn = document.getElementById('penaltyCameraBtn');
+  if (window.penaltyVideoState.localStream) {
+    const video = window.penaltyVideoState.localStream.getVideoTracks()[0];
+    if (video) {
+      video.enabled = !video.enabled;
+      window.penaltyVideoState.cameraOff = !video.enabled;
+      btn.textContent = video.enabled ? '📹 Cam On' : '📹 Cam Off';
+    }
+  }
+};
+
+window.endPenaltyGame = function() {
+  if (window.penaltyVideoState.localStream) {
+    window.penaltyVideoState.localStream.getTracks().forEach(t => t.stop());
+  }
+
+  const stats = FZ.getStats();
+  stats.xp = (stats.xp || 0) + (window.penaltyState.playerScore * 100);
+  FZ.saveStats(stats);
+
+  showToast('⚡ +' + (window.penaltyState.playerScore * 100) + ' XP');
+
+  setTimeout(() => {
+    document.getElementById('penaltyGame').style.display = 'none';
+    document.getElementById('penaltyModeSelector').style.display = 'block';
+  }, 1500);
 };
 
 // Tab switching
